@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "postgres-ops",
+  "displayName": "PostgreSQL Ops",
+  "version": "1.0.0",
+  "description": "Scaffold a project-local Dockerized PostgreSQL, and operate it day-to-day: lifecycle, query, backup.",
+  "author": { "name": "adamm931" },
+  "repository": "https://github.com/adamm931/claude-skills",
+  "license": "MIT",
+  "keywords": ["postgres", "postgresql", "docker", "database", "psql"]
+}

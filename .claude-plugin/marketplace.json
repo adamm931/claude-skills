@@ -1,0 +1,31 @@
+{
+  "name": "claude-skills",
+  "owner": { "name": "adamm931" },
+  "plugins": [
+    {
+      "name": "dotnet-ddd",
+      "source": "./plugins/dotnet/dotnet-ddd",
+      "description": "DDD modular monolith scaffolding and review for .NET, using MediatR and MassTransit."
+    },
+    {
+      "name": "api-spec",
+      "source": "./plugins/system-design/api-spec",
+      "description": "Write API specs (REST, GraphQL) as versioned, decision-recording iteration docs."
+    },
+    {
+      "name": "data-model",
+      "source": "./plugins/system-design/data-model",
+      "description": "Write data-layer specs (schema, indexes, migrations) for SQL Server or PostgreSQL as versioned iteration docs."
+    },
+    {
+      "name": "postgres-ops",
+      "source": "./plugins/postgres/postgres-ops",
+      "description": "Scaffold a project-local Dockerized PostgreSQL, and operate it day-to-day: lifecycle, query, backup."
+    },
+    {
+      "name": "kafka-ops",
+      "source": "./plugins/kafka/kafka-ops",
+      "description": "Scaffold a project-local Dockerized Kafka (KRaft, single-node), and operate it day-to-day: lifecycle, topics, produce/consume."
+    }
+  ]
+}

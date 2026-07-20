@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "data-model",
+  "displayName": "Data Modeling / Schema Spec Writing",
+  "version": "1.0.0",
+  "description": "Write data-layer specs (schema, indexes, migrations) for a chosen database engine as versioned iteration docs.",
+  "author": { "name": "adamm931" },
+  "repository": "https://github.com/adamm931/claude-skills",
+  "license": "MIT",
+  "keywords": ["system-design", "data-model", "schema", "postgresql", "sql-server", "migrations"]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "kafka-ops",
+  "displayName": "Kafka Ops",
+  "version": "1.0.0",
+  "description": "Scaffold a project-local Dockerized Kafka (KRaft, single-node), and operate it day-to-day: lifecycle, topics, produce/consume.",
+  "author": { "name": "adamm931" },
+  "repository": "https://github.com/adamm931/claude-skills",
+  "license": "MIT",
+  "keywords": ["kafka", "kraft", "docker", "eventing", "kcat"]
+}

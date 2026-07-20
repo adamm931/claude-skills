@@ -1,0 +1,13 @@
+services:
+  kafka-ui:
+    image: kafbat/kafka-ui:latest
+    ports:
+      - "${KAFKA_UI_PORT:-8080}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      # Uses the INTERNAL listener - this is container-to-container traffic,
+      # resolved by Compose service name (both files run from the same
+      # project directory, so they share the default network).
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    restart: unless-stopped

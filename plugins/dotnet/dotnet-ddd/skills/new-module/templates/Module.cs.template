@@ -1,0 +1,21 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace {{Sln}}.{{Name}}; // Application project
+
+public static class {{Name}}Module
+{
+    public static IServiceCollection Add{{Name}}Module(this IServiceCollection s, IConfiguration cfg)
+    {
+        s.AddDbContext<{{Name}}DbContext>(o =>
+            o.Use{{DbProvider}}(cfg.GetConnectionString("{{Name}}")));
+
+        // Register the module's services (interface -> internal impl)
+        // s.AddScoped<I{{Name}}Service, {{Name}}Service>();
+        // s.AddScoped<I{{Aggregate}}Repository, {{Aggregate}}Repository>();
+
+        s.AddMediatR(c => c.RegisterServicesFromAssembly(typeof({{Name}}Module).Assembly));
+        return s;
+    }
+}

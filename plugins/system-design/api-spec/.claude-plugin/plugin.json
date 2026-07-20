@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "api-spec",
+  "displayName": "API Spec Writing",
+  "version": "1.0.0",
+  "description": "Write API specs (REST, GraphQL) as versioned, decision-recording iteration docs.",
+  "author": { "name": "adamm931" },
+  "repository": "https://github.com/adamm931/claude-skills",
+  "license": "MIT",
+  "keywords": ["system-design", "api-spec", "rest", "graphql", "documentation"]
+}

@@ -1,0 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+
+namespace {{Sln}}.{{Name}}.Infrastructure;
+
+internal sealed class {{Name}}DbContext(DbContextOptions<{{Name}}DbContext> options)
+    : DbContext(options)
+{
+    protected override void OnModelCreating(ModelBuilder b)
+    {
+        b.HasDefaultSchema("{{name}}"); // module owns its schema
+        b.ApplyConfigurationsFromAssembly(typeof({{Name}}DbContext).Assembly);
+
+        // MassTransit EF Core outbox tables (staged integration events)
+        b.AddInboxStateEntity();
+        b.AddOutboxMessageEntity();
+        b.AddOutboxStateEntity();
+    }
+}

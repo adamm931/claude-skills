@@ -1,0 +1,13 @@
+using MediatR;
+
+namespace {{Sln}}.{{Module}}.Features.{{UseCase}};
+
+public record {{UseCase}}Command({{Args}}) : IRequest<{{Response}}>;
+
+internal sealed class {{UseCase}}Validator : AbstractValidator<{{UseCase}}Command>
+{
+    public {{UseCase}}Validator()
+    {
+        // RuleFor(x => x.SomeField).NotEmpty();
+    }
+}
