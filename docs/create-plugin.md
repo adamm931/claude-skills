@@ -1,8 +1,8 @@
 # Creating a plugin in this marketplace
 
 This repo is a single Claude Code **marketplace** (`.claude-plugin/marketplace.json`) that hosts
-multiple **plugins**, grouped into a folder per `stack` under `plugins/`, so any tech can grow more
-topics later without reshuffling the tree.
+multiple **plugins**, each living directly under `plugins/` — one folder per plugin, no grouping
+folder in between.
 
 ## Naming convention
 
@@ -12,30 +12,26 @@ Every plugin is named:
 {stack}-{topic}
 ```
 
-- `stack` — the language/framework/platform the plugin targets (`dotnet`, `node`, `react`, `api`,
-  `data-schema`, `system-design`, ...). Also the name of its grouping folder under `plugins/`.
+- `stack` — the language/framework/platform the plugin targets (`dotnet`, `node`, `react`, ...).
 - `topic` — the specific concern or pattern the plugin covers within that stack (`ddd`,
   `data-fetching`, `auth`, ...).
 
+The name itself carries the stack — a folder grouping would just repeat what's already in the name.
+
 Examples:
 
-| Plugin name | Stack folder (group) | Topic |
-|---|---|---|
-| `dotnet-ddd` | `plugins/dotnet/` | Domain-Driven Design / modular monolith |
-| `node-ddd` | `plugins/node/` | Domain-Driven Design |
-| `react-data-fetching` | `plugins/react/` | Data fetching (React Query, etc.) |
-| `api-spec` | `plugins/system-design/` | API spec writing (REST, GraphQL, ...) |
-| `data-model` | `plugins/system-design/` | Data-layer spec writing (Postgres, MSSQL, ...) |
+| Plugin name | Topic |
+|---|---|
+| `dotnet-ddd` | Domain-Driven Design / modular monolith |
+| `node-ddd` | Domain-Driven Design |
+| `react-data-fetching` | Data fetching (React Query, etc.) |
+| `api-spec` | API spec writing (REST, GraphQL, ...) |
+| `data-model` | Data-layer spec writing (Postgres, MSSQL, ...) |
 
-Use all-lowercase, hyphen-separated (kebab-case) for `stack`, `topic`, and the plugin directory name
-itself — the directory name IS the plugin name (just nested one level deeper, under its stack).
+Use all-lowercase, hyphen-separated (kebab-case) — the directory name under `plugins/` IS the plugin
+name, with no nesting.
 
-### The three levels: group → plugin → skill
-
-Only two levels are ever directories under `plugins/`: the **stack/group** folder
-(`plugins/{stack}/`), then the **plugin** folder (`plugins/{stack}/{plugin-name}/`). A group is
-never itself a plugin (no `plugin.json` at `plugins/{stack}/`), and a plugin is never nested inside
-another plugin.
+### One plugin per topic, dialects are skills
 
 **Dialects or variants of the same topic are skills inside one plugin, not separate plugins.**
 `api-spec` is one plugin covering "how to write an API spec"; REST and GraphQL are two *skills*
@@ -45,7 +41,7 @@ MSSQL are skills, not plugins, because the doc-writing methodology is the same a
 engine-specific sections differ.
 
 ```
-plugins/system-design/                     ← group (not a plugin — no plugin.json here)
+plugins/
 ├── api-spec/                              ← plugin
 │   └── skills/
 │       ├── api-spec-rest/SKILL.md         ← skill (dialect: REST)
@@ -56,24 +52,28 @@ plugins/system-design/                     ← group (not a plugin — no plugin
         └── data-model-mssql/SKILL.md      ← skill (dialect: SQL Server)
 ```
 
-Reach for a second *plugin* under a group only when the two things are genuinely separable and a
-consumer might reasonably want one without the other (`dotnet-ddd` vs some future `dotnet-testing`).
-Reach for a second *skill* inside one plugin when they're the same job in a different dialect.
+Reach for a second *plugin* only when the two things are genuinely separable and a consumer might
+reasonably want one without the other (`dotnet-ddd` vs some future `dotnet-testing`). Reach for a
+second *skill* inside one plugin when they're the same job in a different dialect.
+
+A setup/install step for a dependency the plugin needs (Docker services, an SDK, a CLI) is also a
+skill inside the plugin, not its own plugin — see `dotnet-setup` inside `dotnet-ddd`, or
+`postgres-setup`/`kafka-setup` inside their respective ops plugins. It only earns a plugin of its own
+if a second, unrelated plugin for the same stack shows up later and needs to share it.
 
 ### Reserving space for a planned plugin
 
-Before a plugin has real content, create its directory (and any parent grouping folders) with an
-empty `.gitkeep` file so the tree/layout is visible in git even though there's no `plugin.json` yet.
-Do **not** add a planned plugin to `.claude-plugin/marketplace.json` until it actually has a
-`plugin.json` — an entry pointing at an empty folder will fail to install.
+Before a plugin has real content, create its directory under `plugins/` with an empty `.gitkeep` file
+so the tree/layout is visible in git even though there's no `plugin.json` yet. Do **not** add a
+planned plugin to `.claude-plugin/marketplace.json` until it actually has a `plugin.json` — an entry
+pointing at an empty folder will fail to install.
 
 ## Layout of a plugin
 
-Each plugin lives at `plugins/{stack}/{stack}-{topic}/` — one folder per stack, one subfolder per
-plugin in that stack — and follows this shape:
+Each plugin lives at `plugins/{stack}-{topic}/` and follows this shape:
 
 ```
-plugins/{stack}/{stack}-{topic}/
+plugins/{stack}-{topic}/
 ├── .claude-plugin/
 │   └── plugin.json          # manifest — the ONLY file allowed in .claude-plugin/
 ├── skills/
@@ -90,9 +90,6 @@ plugins/{stack}/{stack}-{topic}/
 └── CHANGELOG.md
 ```
 
-Adding a second .NET plugin later (e.g. a topic other than DDD) just adds a sibling directory:
-`plugins/dotnet/dotnet-<new-topic>/` — the `dotnet/` folder is shared across every `dotnet-*` plugin.
-
 Rules:
 - Only `plugin.json` goes inside `.claude-plugin/`. `skills/`, `agents/`, `hooks/`, `scripts/` sit at
   the plugin root, or they won't be discovered.
@@ -104,8 +101,7 @@ Rules:
 
 ## Steps to add a new plugin
 
-1. Create the directory: `plugins/{stack}/{stack}-{topic}/` with the layout above (reuse the
-   `plugins/{stack}/` folder if a plugin for that stack already exists).
+1. Create the directory: `plugins/{stack}-{topic}/` with the layout above.
 2. Write `.claude-plugin/plugin.json`:
    ```json
    {
@@ -125,14 +121,14 @@ Rules:
    ```json
    {
      "name": "{stack}-{topic}",
-     "source": "./plugins/{stack}/{stack}-{topic}",
+     "source": "./plugins/{stack}-{topic}",
      "description": "One sentence, same as plugin.json."
    }
    ```
 5. Validate and test locally before pushing:
    ```bash
-   claude plugin validate ./plugins/{stack}/{stack}-{topic} --strict
-   claude --plugin-dir ./plugins/{stack}/{stack}-{topic}
+   claude plugin validate ./plugins/{stack}-{topic} --strict
+   claude --plugin-dir ./plugins/{stack}-{topic}
    ```
 6. Commit and push. Consumers already tracking this marketplace pick it up on
    `/plugin marketplace update`; new consumers run:

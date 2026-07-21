@@ -1,7 +1,7 @@
 # claude-skills
 
-Personal Claude Code plugin marketplace: reusable skills and agents, organized by
-`{stack}-{topic}`, installable across any project.
+Personal Claude Code plugin marketplace: reusable skills and agents, named `{stack}-{topic}`,
+installable across any project.
 
 ## Getting started in Claude Code
 
@@ -57,11 +57,11 @@ collisions between plugins):
 
 | Plugin | Skills | Description |
 |---|---|---|
-| [`dotnet-ddd`](plugins/dotnet/dotnet-ddd) | architecture-rules, init-ddd, new-module, vertical-slice, integration-event, aggregate-design | DDD modular monolith scaffolding and review for .NET (MediatR + MassTransit) |
-| [`api-spec`](plugins/system-design/api-spec) | api-spec-rest ✅, api-spec-graphql (planned) | Write API specs as versioned, decision-recording iteration docs |
-| [`data-model`](plugins/system-design/data-model) | data-model-mssql ✅, data-model-postgres ✅ | Write data-layer specs (schema, indexes, migrations) as versioned iteration docs |
-| [`postgres-ops`](plugins/postgres/postgres-ops) | postgres-setup, postgres-up, postgres-down, postgres-status, postgres-logs, postgres-reset, postgres-query, postgres-backup | Scaffold a project-local Dockerized Postgres and operate it day-to-day |
-| [`kafka-ops`](plugins/kafka/kafka-ops) | kafka-setup, kafka-up, kafka-down, kafka-status, kafka-logs, kafka-reset, kafka-topics | Scaffold a project-local Dockerized Kafka (KRaft) and operate it day-to-day |
+| [`dotnet-ddd`](plugins/dotnet-ddd) | dotnet-setup, architecture-rules, init-ddd, new-module, vertical-slice, integration-event, aggregate-design | DDD modular monolith scaffolding and review for .NET (MediatR + MassTransit) |
+| [`api-spec`](plugins/api-spec) | api-spec-rest ✅, api-spec-graphql (planned) | Write API specs as versioned, decision-recording iteration docs |
+| [`data-model`](plugins/data-model) | data-model-mssql ✅, data-model-postgres ✅ | Write data-layer specs (schema, indexes, migrations) as versioned iteration docs |
+| [`postgres-ops`](plugins/postgres-ops) | postgres-setup, postgres-up, postgres-down, postgres-status, postgres-logs, postgres-reset, postgres-query, postgres-backup | Scaffold a project-local Dockerized Postgres and operate it day-to-day |
+| [`kafka-ops`](plugins/kafka-ops) | kafka-setup, kafka-up, kafka-down, kafka-status, kafka-logs, kafka-reset, kafka-topics | Scaffold a project-local Dockerized Kafka (KRaft) and operate it day-to-day |
 
 `api-spec` and `data-model` were extracted from the spec-writing conventions in
 [`adamm931/todoly`](https://github.com/adamm931/todoly)'s `docs/specs/` — one API spec and one
@@ -75,35 +75,30 @@ than assuming `dev-stack`'s shared, always-running instance, so they work in any
 
 ## Roadmap
 
-Placeholder folders (marked with `.gitkeep`) reserve the layout for planned plugins/skills so the
-tree can grow without reshuffling. Not yet installable — no `plugin.json` (or, for a planned skill,
-no `SKILL.md`) yet.
+Placeholder folders (marked with `.gitkeep`) reserve the name for planned plugins so the tree can
+grow without reshuffling. Not yet installable — no `plugin.json` yet.
 
 ```
 plugins/
-├── dotnet/
-│   └── dotnet-ddd/                        ✅ shipped
-├── node/
-│   └── node-ddd/
-├── react/
-│   ├── react-data-fetching/               # React Query / data-fetching conventions
-│   ├── react-data-caching/                # client-side caching strategy
-│   ├── react-pure-component-design/       # pure/presentational component patterns
-│   └── react-ui-kit/                      # shared UI kit conventions
-└── system-design/
-    ├── api-spec/                          ✅ shipped
-    │   └── skills/
-    │       ├── api-spec-rest/             ✅ shipped
-    │       └── api-spec-graphql/          # planned — same doc shape, GraphQL SDL notation
-    └── data-model/                        ✅ shipped
-        └── skills/
-            ├── data-model-mssql/          ✅ shipped
-            └── data-model-postgres/       ✅ shipped
+├── dotnet-ddd/                         ✅ shipped
+├── node-ddd/
+├── react-data-fetching/                # React Query / data-fetching conventions
+├── react-data-caching/                 # client-side caching strategy
+├── react-pure-component-design/        # pure/presentational component patterns
+├── react-ui-kit/                       # shared UI kit conventions
+├── api-spec/                           ✅ shipped
+│   └── skills/
+│       ├── api-spec-rest/              ✅ shipped
+│       └── api-spec-graphql/           # planned — same doc shape, GraphQL SDL notation
+└── data-model/                         ✅ shipped
+    └── skills/
+        ├── data-model-mssql/           ✅ shipped
+        └── data-model-postgres/        ✅ shipped
 ```
 
-See [`docs/create-plugin.md`](docs/create-plugin.md#the-three-levels-group--plugin--skill) for why
-`api-spec` and `data-model` are plugins (not groups) with REST/GraphQL and Postgres/MSSQL as skills
-inside them, rather than four separate plugins.
+See [`docs/create-plugin.md`](docs/create-plugin.md#one-plugin-per-topic-dialects-are-skills) for why
+`api-spec` and `data-model` are each one plugin with REST/GraphQL and Postgres/MSSQL as skills inside
+them, rather than four separate plugins.
 
 ## Adding a new plugin
 

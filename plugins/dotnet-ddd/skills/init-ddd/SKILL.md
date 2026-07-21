@@ -8,12 +8,14 @@ description: >
 
 # Initialize a DDD modular monolith
 
-1. Confirm module names, database provider, and message broker with the user if not given.
-2. Scaffold the solution skeleton from `templates/`:
+1. Run the `dotnet-setup` skill first if `dotnet` hasn't been confirmed working in this environment
+   yet — this is the mandatory first step before scaffolding anything.
+2. Confirm module names, database provider, and message broker with the user if not given.
+3. Scaffold the solution skeleton from `templates/`:
    - `ECommerce.Api` host project (wires modules, MediatR, MassTransit).
    - `ECommerce.SharedKernel` (base types — see `templates/SharedKernel.cs.template`).
    - A first module via the `new-module` skill.
-3. Write a `CLAUDE.md` at the repo root from `templates/CLAUDE.md.template`, recording chosen module
+4. Write a `CLAUDE.md` at the repo root from `templates/CLAUDE.md.template`, recording chosen module
    names, DB/provider, broker, and a pointer to the `architecture-rules` skill — so the rules persist
    in this repo across sessions.
-4. Register MediatR pipeline behaviors (validation → logging → unit-of-work) in the host once.
+5. Register MediatR pipeline behaviors (validation → logging → unit-of-work) in the host once.
