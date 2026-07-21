@@ -23,6 +23,11 @@
       "description": "Write data-layer specs (schema, indexes, migrations) for SQL Server or PostgreSQL as versioned iteration docs."
     },
     {
+      "name": "react-standards",
+      "source": "./plugins/react-standards",
+      "description": "Opinionated standards for React + TypeScript apps: project scaffold, forms, theming/design tokens, pure-component architecture, data fetching, local state, error handling, lazy-loaded routes, and lint/format setup."
+    },
+    {
       "name": "postgres-ops",
       "source": "./plugins/postgres-ops",
       "description": "Scaffold a project-local Dockerized PostgreSQL, and operate it day-to-day: lifecycle, query, backup."

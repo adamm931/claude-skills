@@ -1,0 +1,18 @@
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --primary: 222 89% 55%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 0 0% 98%;
+  --primary: 217 91% 60%;
+}
+
+/* optional additional design presets, switched independently of light/dark */
+[data-theme="brand-b"] {
+  --primary: 280 80% 55%;
+  --radius: 0.25rem;
+}
