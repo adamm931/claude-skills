@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using {{Sln}}.SharedKernel;
 using {{Sln}}.{{Name}}.Application;
 
 namespace {{Sln}}.{{Name}}.Infrastructure; // must be Infrastructure — {{Name}}DbContext is internal,
@@ -15,15 +16,36 @@ public static class {{Name}}Module
             o.Use{{DbProvider}}(cfg.GetConnectionString("{{Name}}")));
 
         // Register the module's services (interface -> internal impl)
-        // s.AddScoped<I{{Name}}Service, {{Name}}Service>();
         // s.AddScoped<I{{Aggregate}}Repository, {{Aggregate}}Repository>();
+        // s.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Handlers/validators live in the Application assembly, not this one — scan via the
-        // marker type, not typeof({{Name}}Module), which would scan the wrong (empty) assembly.
-        // includeInternalTypes: true — validators are `internal` per the vertical-slice convention;
-        // without this flag they're silently never registered (see vertical-slice skill).
-        s.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly));
-        s.AddValidatorsFromAssembly(typeof(ApplicationAssemblyMarker).Assembly, includeInternalTypes: true);
+        // Handlers, validators, and endpoints live in the Application assembly, not this one — scan
+        // via the marker type, not typeof({{Name}}Module), which would scan the wrong (empty) assembly.
+        var applicationAssembly = typeof(ApplicationAssemblyMarker).Assembly;
+
+        // Command/query handlers (no MediatR): Scrutor scans, publicOnly:false picks up internal ones.
+        s.Scan(scan => scan.FromAssemblies(applicationAssembly)
+            .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces().WithScopedLifetime()
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+                .AsImplementedInterfaces().WithScopedLifetime()
+            .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+                .AsImplementedInterfaces().WithScopedLifetime()
+            .AddClasses(c => c.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
+                .AsImplementedInterfaces().WithScopedLifetime());
+
+        // Cross-cutting concerns are decorators over the handler interfaces, not copy-paste in handlers.
+        s.Decorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
+        s.Decorate(typeof(ICommandHandler<>), typeof(ValidationDecorator.CommandBaseHandler<>));
+
+        // includeInternalTypes: true — validators are `public` per the vertical-slice convention, but
+        // keep the flag so an internal validator is never silently skipped by the scanner.
+        s.AddValidatorsFromAssembly(applicationAssembly, includeInternalTypes: true);
+
+        // Endpoints (IEndpoint) also live in the Application assembly (they construct internal
+        // commands). The host discovers them with AddEndpoints/MapEndpoints — see the SharedKernel
+        // IEndpoint type and the host's EndpointExtensions.
+        s.AddEndpoints(applicationAssembly);
 
         return s;
     }

@@ -1,0 +1,8 @@
+// src/mocks/browser.ts
+// Browser entry point for the mock layer. Started lazily from main.tsx so MSW and the seed data
+// are never bundled into a production build where mocks are off.
+import { setupWorker } from "msw/browser";
+
+import { handlers } from "./handlers";
+
+export const worker = setupWorker(...handlers);

@@ -2,10 +2,10 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "react-standards",
   "displayName": "React Standards",
-  "version": "1.0.0",
-  "description": "Opinionated standards for React + TypeScript apps: project scaffold, forms, theming/design tokens, pure-component architecture, data fetching, local state, error handling, lazy-loaded routes, and lint/format setup.",
+  "version": "1.1.0",
+  "description": "Opinionated standards for React + TypeScript apps: project scaffold, forms, theming/design tokens, pure-component architecture, data fetching, spec-driven mock data layer, local state, error handling, lazy-loaded routes, and lint/format setup.",
   "author": { "name": "adamm931" },
   "repository": "https://github.com/adamm931/claude-skills",
   "license": "MIT",
-  "keywords": ["react", "typescript", "vite", "react-query", "jotai", "shadcn", "react-hook-form", "zod", "eslint"]
+  "keywords": ["react", "typescript", "vite", "react-query", "jotai", "shadcn", "react-hook-form", "zod", "eslint", "msw", "mock-api"]
 }

@@ -27,3 +27,6 @@ Install: `@tanstack/react-query`.
 - Default `staleTime`/`retry`/error behavior configured once on the `QueryClient`, not per-call,
   unless a specific query needs to override it. Wire the client's default mutation `onError` to
   the toast pipeline — see `error-handling`.
+- When the backend endpoints don't exist yet, build the fetchers against the API spec and let MSW
+  answer them from an in-memory mock — see `mock-data-layer`. The fetchers, query keys, and
+  mappers stay identical when the real backend lands; only the mock handlers get deleted.

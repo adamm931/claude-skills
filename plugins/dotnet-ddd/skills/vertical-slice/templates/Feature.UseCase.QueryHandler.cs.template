@@ -1,0 +1,19 @@
+// File: Features/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.Handler.cs
+using {{Sln}}.SharedKernel;
+using {{Sln}}.{{Module}}.Domain;
+
+namespace {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+// Query handler: project with EF straight into the Response DTO. Never load the full aggregate.
+internal sealed class {{UseCase}}{{Feature}}Handler(I{{Module}}ReadConnection db)
+    : IQueryHandler<{{UseCase}}{{Feature}}Query, {{Feature}}Response>
+{
+    public async Task<Result<{{Feature}}Response>> Handle({{UseCase}}{{Feature}}Query query, CancellationToken ct)
+    {
+        var {{feature}} = await db.QuerySingle<{{Feature}}Response>(/* sql / projection */, ct);
+        if ({{feature}} is null)
+            return Result.Failure<{{Feature}}Response>({{Feature}}Errors.NotFound(query./* Id */default!));
+
+        return {{feature}};
+    }
+}

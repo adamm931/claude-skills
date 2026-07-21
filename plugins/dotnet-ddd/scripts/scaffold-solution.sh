@@ -59,8 +59,14 @@ if [[ ! -f "$SkDir/$SolutionName.SharedKernel.csproj" ]]; then
     rm -f "$SkDir"/Class1.cs
     TemplateDir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills/init-ddd/templates" && pwd)"
     sed "s/{{SolutionName}}/$SolutionName/g" "$TemplateDir/SharedKernel.cs.template" > "$SkDir/SharedKernel.cs"
-    # SharedKernel.cs declares `IDomainEvent : MediatR.INotification` directly.
-    dotnet add "$SkDir/$SolutionName.SharedKernel.csproj" package MediatR
+    # SharedKernel defines the Result pattern, the custom ICommand/IQuery messaging + ValidationDecorator
+    # (FluentValidation), and the IEndpoint / CustomResults web helpers — so it needs the ASP.NET Core
+    # shared framework (there is no `dotnet add` for a FrameworkReference; inject it into the csproj).
+    SkCsproj="$SkDir/$SolutionName.SharedKernel.csproj"
+    dotnet add "$SkCsproj" package FluentValidation
+    if ! grep -q "Microsoft.AspNetCore.App" "$SkCsproj"; then
+        sed -i 's#</Project>#  <ItemGroup>\n    <FrameworkReference Include="Microsoft.AspNetCore.App" />\n  </ItemGroup>\n</Project>#' "$SkCsproj"
+    fi
 else
     echo "-> $SolutionName.SharedKernel already exists, skipping"
 fi
@@ -70,8 +76,6 @@ dotnet sln add "$ApiDir/$SolutionName.Api.csproj" "$SkDir/$SolutionName.SharedKe
 dotnet add "$ApiDir/$SolutionName.Api.csproj" reference "$SkDir/$SolutionName.SharedKernel.csproj"
 
 echo "-> adding base packages to $SolutionName.Api"
-dotnet add "$ApiDir/$SolutionName.Api.csproj" package MediatR
-dotnet add "$ApiDir/$SolutionName.Api.csproj" package FluentValidation.DependencyInjectionExtensions
 dotnet add "$ApiDir/$SolutionName.Api.csproj" package "$EfPackage"
 dotnet add "$ApiDir/$SolutionName.Api.csproj" package MassTransit
 

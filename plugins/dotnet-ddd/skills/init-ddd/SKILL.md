@@ -13,9 +13,11 @@ description: >
 2. Confirm module names, database provider, and message broker with the user if not given. The
    broker is effectively always "inmemory" at scaffold time (MassTransit's built-in in-memory
    transport) — see `architecture-rules`; a real broker is a later, deliberate migration.
-3. Scaffold the solution skeleton — the `.sln`, `<SolutionName>.Api` host project (wires modules,
-   MediatR, MassTransit — package refs added automatically), and `<SolutionName>.SharedKernel`
-   (base types from `templates/SharedKernel.cs.template`):
+3. Scaffold the solution skeleton — the `.sln`, `<SolutionName>.Api` host project (wires modules and
+   MassTransit — package refs added automatically), and `<SolutionName>.SharedKernel` (Result/Error,
+   the custom `ICommand`/`IQuery` messaging + `ValidationDecorator`, `IEndpoint` discovery, and
+   `CustomResults`, from `templates/SharedKernel.cs.template` — needs a `Microsoft.AspNetCore.App`
+   FrameworkReference plus FluentValidation and Scrutor packages):
 
    ```bash
    bash "scripts/scaffold-solution.sh" <SolutionName> <postgres|sqlserver> inmemory [OutputDir]
@@ -28,4 +30,7 @@ description: >
    names, DB/provider, broker, and a pointer to the `architecture-rules` skill — so the rules persist
    in this repo across sessions. This step is manual (module list and prose aren't scaffold-script
    material).
-6. Register MediatR pipeline behaviors (validation → logging → unit-of-work) in the host once.
+6. In the host `Program.cs`, after building the app, call `app.MapEndpoints();` once — it maps every
+   module's `IEndpoint`s. Handlers, validators, decorators, and endpoint registration are all wired
+   per-module inside each `Add<Name>Module` (Scrutor scan + `Decorate` + `AddEndpoints`); there is no
+   global MediatR/pipeline-behavior registration.

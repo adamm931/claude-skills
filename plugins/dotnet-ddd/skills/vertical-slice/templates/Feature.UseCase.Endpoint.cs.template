@@ -1,0 +1,33 @@
+// File: Endpoints/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.cs
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using {{Sln}}.SharedKernel;
+using {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+namespace {{Sln}}.{{Module}}.Application.Endpoints.{{FeaturePlural}}.{{UseCase}};
+
+// internal sealed : IEndpoint. Auto-discovered by AddEndpoints/MapEndpoints — no registration.
+// Lives in the Application assembly (not the host): it constructs the `internal` command/query,
+// which is only visible inside this assembly.
+internal sealed class {{UseCase}}{{Feature}}Endpoint : IEndpoint
+{
+    // Only when there is a JSON body; maps 1:1 to the command inside the lambda.
+    public sealed record Request(/* fields */);
+
+    public void MapEndpoint(IEndpointRouteBuilder app)
+    {
+        app.MapPost("/v1/{{route}}", async (
+            Request body,
+            ICommandHandler<{{UseCase}}{{Feature}}Command, {{Feature}}Response> handler,
+            CancellationToken ct) =>
+        {
+            var command = new {{UseCase}}{{Feature}}Command(/* body.Field, ... */);
+
+            Result<{{Feature}}Response> result = await handler.Handle(command, ct);
+
+            return result.Match(Results.Ok, CustomResults.Problem);
+        })
+        .WithTags("{{Feature}}");
+    }
+}

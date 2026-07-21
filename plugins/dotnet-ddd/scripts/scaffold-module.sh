@@ -79,15 +79,19 @@ dotnet add "$AppProj" reference "$DomainProj" "$PublicProj"
 dotnet add "$InfraProj" reference "$DomainProj" "$AppProj" "$PublicProj"
 
 echo "-> adding packages"
-dotnet add "$AppProj" package MediatR
+# Application: FluentValidation for the slice validators (no MediatR — messaging is SharedKernel's
+# custom ICommand/IQuery). Infrastructure: EF provider + outbox, Scrutor for the handler scan/decorate
+# in Add<Name>Module, and FluentValidation.DependencyInjectionExtensions for AddValidatorsFromAssembly.
 dotnet add "$AppProj" package FluentValidation
 dotnet add "$InfraProj" package "$EfPackage"
 dotnet add "$InfraProj" package MassTransit.EntityFrameworkCore
+dotnet add "$InfraProj" package Scrutor
 dotnet add "$InfraProj" package FluentValidation.DependencyInjectionExtensions
 
-# Application hosts Map<Name>Endpoints (see reference-graph note above), so it needs ASP.NET Core's
-# routing types. `dotnet add package` has no CLI form for a FrameworkReference — it's an MSBuild
-# item with no NuGet equivalent — so this is inserted directly, once (idempotent on re-run).
+# Application hosts the IEndpoint classes (see reference-graph note above), which construct the
+# module's internal commands and so must live in this assembly. They use ASP.NET Core's routing/HTTP
+# types. `dotnet add package` has no CLI form for a FrameworkReference — it's an MSBuild item with no
+# NuGet equivalent — so this is inserted directly, once (idempotent on re-run).
 if ! grep -q 'FrameworkReference Include="Microsoft.AspNetCore.App"' "$AppProj"; then
     sed -i 's#</Project>#\n  <ItemGroup>\n    <FrameworkReference Include="Microsoft.AspNetCore.App" />\n  </ItemGroup>\n\n</Project>#' "$AppProj"
 fi

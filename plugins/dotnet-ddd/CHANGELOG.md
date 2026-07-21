@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.0.0
+- **Breaking: Clean Architecture realignment of the vertical-slice convention.** A slice is now
+  **one folder per use case, one file per component**, with fully-qualified dotted names —
+  `<Feature>.<UseCase>.<Component>` (the `module.operation.component` convention):
+  `Features/Order/Order.Create/Order.Create.Command.cs`, `.Validator.cs`, `.Handler.cs`,
+  `.Response.cs`, and the endpoint at `Endpoints/Order/Order.Create/Order.Create.cs`. Replaces the
+  old single-merged-file-per-feature layout. `vertical-slice` skill and its templates rewritten
+  (one template per component).
+- **Breaking: drop MediatR for a custom, in-house messaging stack.** `SharedKernel` now ships the
+  `Result`/`Error` pattern, `ICommand`/`ICommand<T>`/`IQuery<T>` with matching handler interfaces,
+  the `ValidationDecorator`, `IEndpoint` discovery (`AddEndpoints`/`MapEndpoints`), and
+  `CustomResults` (Error→ProblemDetails). Handlers **return `Result`/`Result<T>` and never throw**
+  for expected failures; error factories live on a `<Feature>Errors` class in Domain; endpoints
+  translate with `result.Match(Results.Ok, CustomResults.Problem)`.
+- Module registration (`Add<Name>Module`) now uses **Scrutor** to scan+register handlers and
+  `Decorate` them with the validation decorator, `AddValidatorsFromAssembly(includeInternalTypes:
+  true)`, and `AddEndpoints(applicationAssembly)`. The host maps every module's endpoints uniformly
+  with one `app.MapEndpoints();` — there is no per-module `Map<Name>Endpoints`.
+- Scaffold scripts updated to match: `SharedKernel` gets a `Microsoft.AspNetCore.App` framework
+  reference + `FluentValidation` (no MediatR); each module's Application gets `FluentValidation` and
+  Infrastructure gets `Scrutor`; MediatR removed from the Api host and SharedKernel.
+- `architecture-rules`, `aggregate-design` (domain events are plain `IDomainEvent`, no
+  `INotification`), `init-ddd`, `new-module`, the `CLAUDE.md`/`SharedKernel.cs` templates, and the
+  `ddd-reviewer` agent all updated for the new stack.
+
 ## 1.2.0
 - Add `scripts/scaffold-solution.sh` and `scripts/scaffold-module.sh`: `init-ddd` and `new-module`
   previously only shipped C# content templates with no actual `dotnet new`/`dotnet sln add`/

@@ -2,7 +2,8 @@
 name: architecture-rules
 description: >
   The mandatory architecture rules for this .NET solution: DDD tactical patterns,
-  vertical slice organization, module boundaries, MediatR for in-process messaging,
+  vertical slice organization, module boundaries, custom ICommand/IQuery messaging with the Result
+  pattern for in-process handling,
   MassTransit for integration events, and the transactional outbox. Consult before
   creating or modifying any module, slice, aggregate, event, or handler.
 ---
@@ -20,13 +21,26 @@ description: >
 - Aggregates record domain events; they do not publish to the bus themselves.
 
 ## Slices (features)
-- Organize by feature under `Features/<UseCase>/`, not by technical layer.
+- Organize by feature, not by technical layer: **one folder per use case, one file per component**.
+  Names are fully qualified — `<Feature>.<UseCase>.<Component>` (the `module.operation.component`
+  convention): `Features/Order/Order.Create/Order.Create.Command.cs`, `.Validator.cs`, `.Handler.cs`,
+  `.Response.cs`, and the endpoint at `Endpoints/Order/Order.Create/Order.Create.cs`. Never a single
+  merged feature file.
 - Commands go through the aggregate + one transaction. Queries project straight to DTOs.
-- Every request is a MediatR `IRequest`; cross-cutting concerns go in pipeline behaviors
-  (validation → logging → unit-of-work), never copy-pasted into handlers.
+- **Result, never throw** for expected failures: handlers return `Result` / `Result<T>` and
+  `return Result.Failure(<Feature>Errors.X(...))`. Error factories live on a `<Feature>Errors` static
+  class in the Domain layer; `Error.Type` (NotFound/Conflict/Problem/Validation/Failure) drives the
+  HTTP status at the edge. See the `vertical-slice` skill.
 
 ## Messaging
-- In-process (commands, queries, domain events): MediatR.
+- In-process (commands, queries): custom `ICommand` / `ICommand<T>` / `IQuery<T>` +
+  `ICommandHandler<>` / `ICommandHandler<,>` / `IQueryHandler<,>` (in `SharedKernel`), discovered by
+  Scrutor assembly scan. **No MediatR.** Cross-cutting concerns are Scrutor **decorators** over the
+  handler interfaces (validation → logging), never copy-pasted into handlers.
+- Domain events: `IDomainEvent` + `IDomainEventHandler<>`, dispatched from the unit of work.
+- Endpoints implement `IEndpoint` (auto-discovered via `AddEndpoints`/`MapEndpoints`), resolve the
+  handler interface directly, and translate `Result` at the edge with `result.Match(Results.Ok,
+  CustomResults.Problem)`.
 - Between modules (integration events): MassTransit. In-memory in the monolith, broker after split.
 - Integration events are flat/serializable. Domain events may carry the aggregate.
 

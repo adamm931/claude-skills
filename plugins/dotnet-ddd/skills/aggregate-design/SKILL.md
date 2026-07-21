@@ -20,8 +20,8 @@ description: >
 - No identity, no side effects. Good for Money, Address, Email, DateRange.
 
 ## Domain events
-- Recorded by the aggregate (`Raise(...)`), implement `IDomainEvent : INotification`.
-- Carry what happened; may reference the aggregate (they stay in-process via MediatR).
+- Recorded by the aggregate (`Raise(...)`), implement `IDomainEvent` (plain marker; no MediatR).
+- Carry what happened; may reference the aggregate. Handled in-process by `IDomainEventHandler<T>`.
 - Dispatched around SaveChanges, in the same transaction; translate to integration events for
   cross-module effects (see the `integration-event` skill).
 

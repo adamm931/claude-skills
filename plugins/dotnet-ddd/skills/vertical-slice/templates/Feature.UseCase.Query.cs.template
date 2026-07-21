@@ -1,0 +1,7 @@
+// File: Features/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.Query.cs
+using {{Sln}}.SharedKernel;
+
+namespace {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+// Reads only: no validator, no domain events, no SaveChanges. Handler returns Result<T>.
+public sealed record {{UseCase}}{{Feature}}Query({{Args}}) : IQuery<{{Feature}}Response>;

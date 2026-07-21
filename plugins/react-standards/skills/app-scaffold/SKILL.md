@@ -43,6 +43,7 @@ description: >
    ├── components/                 # truly shared/reusable UI (buttons, modals, layout)
    ├── hooks/                      # shared hooks used across features
    ├── lib/                        # generic helpers, api client instance, config
+   ├── mocks/                      # MSW mock API while the backend is in progress — see mock-data-layer
    ├── pages/ (or routes/)         # thin route components that compose features
    ├── types/                      # shared global types
    ├── styles/

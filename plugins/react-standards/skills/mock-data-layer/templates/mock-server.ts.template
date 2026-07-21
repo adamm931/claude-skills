@@ -1,0 +1,13 @@
+// src/mocks/server.ts
+// Node entry point for the SAME handlers, used by tests (Vitest/Jest). Tests get the mock API for
+// free without a running backend. Wire it up once in the test setup file:
+//
+//   import { server } from "@/mocks/server";
+//   beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+//   afterEach(() => { server.resetHandlers(); resetDb(); });   // resetDb from ./db
+//   afterAll(() => server.close());
+import { setupServer } from "msw/node";
+
+import { handlers } from "./handlers";
+
+export const server = setupServer(...handlers);

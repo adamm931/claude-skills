@@ -2,10 +2,10 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "dotnet-ddd",
   "displayName": "DDD Modular Monolith (.NET)",
-  "version": "1.2.0",
-  "description": "Scaffold and review a DDD, vertically-sliced modular monolith in .NET using MediatR and MassTransit.",
+  "version": "2.0.0",
+  "description": "Scaffold and review a DDD, vertically-sliced modular monolith in .NET — Clean Architecture slices (one file per component, dotted naming), the Result pattern, custom ICommand/IQuery messaging, and MassTransit.",
   "author": { "name": "adamm931" },
   "repository": "https://github.com/adamm931/claude-skills",
   "license": "MIT",
-  "keywords": ["dotnet", "ddd", "modular-monolith", "mediatr", "masstransit", "vertical-slice"]
+  "keywords": ["dotnet", "ddd", "modular-monolith", "clean-architecture", "result-pattern", "masstransit", "vertical-slice"]
 }

@@ -1,0 +1,8 @@
+// File: Features/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.Command.cs
+using {{Sln}}.SharedKernel;
+
+namespace {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+// ICommand           -> handler returns Result        (endpoint responds 204 NoContent)
+// ICommand<TResponse> -> handler returns Result<T>     (endpoint responds 200 Ok / 201 Created)
+public sealed record {{UseCase}}{{Feature}}Command({{Args}}) : ICommand<{{Feature}}Response>;

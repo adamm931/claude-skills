@@ -6,11 +6,15 @@ Architecture rules are authoritative: see the `architecture-rules` skill (dotnet
 ## This project
 - Modules (bounded contexts): {{ModuleList}}
 - Database: {{DbProvider}} — each module owns its schema; no cross-module joins.
-- Messaging: MediatR in-process; MassTransit for integration events ({{Broker}}).
+- Messaging: custom `ICommand`/`IQuery` + Scrutor-scanned handlers with the Result pattern
+  (no MediatR); MassTransit for integration events ({{Broker}}).
 - Reliability: MassTransit EF Core outbox (`UseBusOutbox`); consumers are idempotent.
 
 ## Non-negotiables
 - Modules talk only through `*.Public`. Implementation types are `internal`.
 - One aggregate mutated per transaction; invariants inside the aggregate root.
-- Add features as vertical slices under `Features/<UseCase>/` (use the `vertical-slice` skill).
+- Handlers return `Result`/`Result<T>` and never throw for expected failures; endpoints translate
+  with `result.Match(Results.Ok, CustomResults.Problem)`.
+- Add features as vertical slices — one folder per use case, one file per component, dotted
+  `<Feature>.<UseCase>.<Component>` names (use the `vertical-slice` skill).
 - Add cross-module reactions as integration events (use the `integration-event` skill).

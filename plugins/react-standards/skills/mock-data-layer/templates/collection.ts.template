@@ -1,0 +1,81 @@
+// src/mocks/db/collection.ts
+// Generic in-memory collection backing the mock handlers. NOT app code — it exists only under
+// src/mocks and stores raw WIRE-shaped rows (snake_case, prefixed ids) exactly as the API returns
+// them, so handlers can hand them straight back and the app's mappers do the simplifying.
+
+export interface WireRow {
+  id: string;
+}
+
+export interface PageParams {
+  limit: number;
+  cursor: string | null;
+}
+
+export interface Page<T> {
+  data: T[];
+  next_cursor: string | null;
+}
+
+export class Collection<T extends WireRow> {
+  private items = new Map<string, T>();
+
+  /** Replace all contents — used by seed() and resetDb() between tests. */
+  seed(rows: T[]): void {
+    this.items.clear();
+    for (const row of rows) this.items.set(row.id, structuredClone(row));
+  }
+
+  all(): T[] {
+    return [...this.items.values()];
+  }
+
+  where(predicate: (row: T) => boolean): T[] {
+    return this.all().filter(predicate);
+  }
+
+  get(id: string): T | null {
+    return this.items.get(id) ?? null;
+  }
+
+  insert(row: T): T {
+    this.items.set(row.id, row);
+    return row;
+  }
+
+  update(id: string, patch: Partial<T>): T | null {
+    const row = this.items.get(id);
+    if (!row) return null;
+    const next = { ...row, ...patch };
+    this.items.set(id, next);
+    return next;
+  }
+
+  remove(id: string): boolean {
+    return this.items.delete(id);
+  }
+
+  /**
+   * Cursor-paginate an already-filtered/ordered list. The cursor is the last id of the previous
+   * page, base64-encoded to honour the spec's "opaque cursor" contract. next_cursor is null when
+   * the list is exhausted.
+   */
+  paginate(rows: T[], { limit, cursor }: PageParams): Page<T> {
+    const startId = cursor ? decodeCursor(cursor) : null;
+    const startIdx = startId ? rows.findIndex((r) => r.id === startId) + 1 : 0;
+    const slice = rows.slice(startIdx, startIdx + limit);
+    const last = slice.at(-1);
+    const exhausted = !last || rows.findIndex((r) => r.id === last.id) >= rows.length - 1;
+    return { data: slice, next_cursor: exhausted ? null : encodeCursor(last.id) };
+  }
+}
+
+const encodeCursor = (id: string): string => btoa(JSON.stringify({ id }));
+
+const decodeCursor = (cursor: string): string | null => {
+  try {
+    return (JSON.parse(atob(cursor)) as { id: string }).id;
+  } catch {
+    return null;
+  }
+};

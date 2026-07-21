@@ -1,0 +1,13 @@
+// src/mocks/config.ts
+// Central knobs for the mock layer, driven by env so behaviour changes without touching handlers.
+// Only read in the browser (main.tsx wiring); tests import the MSW server directly and control
+// latency/errors per-test instead.
+
+export const mockConfig = {
+  /** Master switch. When false, main.tsx never starts the worker and every request hits the network. */
+  enabled: import.meta.env.VITE_ENABLE_MOCKS === "true",
+  /** Artificial per-request delay (ms) so loading/skeleton states are actually visible while building. */
+  latencyMs: Number(import.meta.env.VITE_MOCK_LATENCY_MS ?? 300),
+  /** 0..1 — fraction of requests that return a simulated 500, for exercising error UI. 0 disables. */
+  errorRate: Number(import.meta.env.VITE_MOCK_ERROR_RATE ?? 0),
+};

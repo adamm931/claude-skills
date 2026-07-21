@@ -1,0 +1,23 @@
+// File: Features/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.Handler.cs
+using {{Sln}}.SharedKernel;
+using {{Sln}}.{{Module}}.Domain;
+
+namespace {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+// internal sealed, primary constructor. Load -> mutate via an aggregate method -> save.
+// Expected failures return Result.Failure(<Feature>Errors.X(...)); never throw for those.
+internal sealed class {{UseCase}}{{Feature}}Handler(I{{Feature}}Repository repo, IUnitOfWork uow)
+    : ICommandHandler<{{UseCase}}{{Feature}}Command, {{Feature}}Response>
+{
+    public async Task<Result<{{Feature}}Response>> Handle({{UseCase}}{{Feature}}Command cmd, CancellationToken ct)
+    {
+        var {{feature}} = await repo.GetById(/* id */ default!, ct);
+        if ({{feature}} is null)
+            return Result.Failure<{{Feature}}Response>({{Feature}}Errors.NotFound(/* id */ default!));
+
+        // {{feature}}.DoSomething(cmd...);   // invariants live inside the aggregate
+
+        await uow.SaveChangesAsync(ct);       // outbox commits in the same transaction
+        return {{Feature}}Response.From({{feature}});
+    }
+}

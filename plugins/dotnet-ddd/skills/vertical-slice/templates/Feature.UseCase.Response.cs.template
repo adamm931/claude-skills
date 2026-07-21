@@ -1,0 +1,9 @@
+// File: Features/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.Response.cs
+namespace {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+// Flat, serialization-friendly. Owned by this slice — do not share across slices.
+public sealed record {{Feature}}Response(string Id /*, ... */)
+{
+    // For command handlers that return a body, a mapping helper keeps the handler tidy:
+    // internal static {{Feature}}Response From({{Feature}} x) => new(x.Id.ToString());
+}

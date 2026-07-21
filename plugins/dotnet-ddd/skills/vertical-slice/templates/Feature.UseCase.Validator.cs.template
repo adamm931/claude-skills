@@ -1,0 +1,14 @@
+// File: Features/{{Feature}}/{{Feature}}.{{UseCase}}/{{Feature}}.{{UseCase}}.Validator.cs
+using FluentValidation;
+
+namespace {{Sln}}.{{Module}}.Application.{{FeaturePlural}}.{{UseCase}};
+
+// public so AddValidatorsFromAssembly(includeInternalTypes: true) and the ValidationDecorator can
+// find it. It runs automatically before the handler — the handler never re-checks input shape.
+public sealed class {{UseCase}}{{Feature}}Validator : AbstractValidator<{{UseCase}}{{Feature}}Command>
+{
+    public {{UseCase}}{{Feature}}Validator()
+    {
+        // RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+    }
+}
