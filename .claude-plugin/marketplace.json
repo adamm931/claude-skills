@@ -25,7 +25,7 @@
     {
       "name": "react-standards",
       "source": "./plugins/react-standards",
-      "description": "Opinionated standards for React + TypeScript apps: project scaffold, forms, theming/design tokens, pure-component architecture, data fetching, local state, error handling, lazy-loaded routes, and lint/format setup."
+      "description": "Opinionated standards for React + TypeScript apps: project scaffold, forms, theming/design tokens, pure-component architecture, data fetching, spec-driven mock data layer, local state, error handling, lazy-loaded routes, and lint/format setup."
     },
     {
       "name": "postgres-ops",
