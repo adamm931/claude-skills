@@ -1,0 +1,6 @@
+namespace {{Sln}}.{{Name}}.Application;
+
+// Public marker type so Infrastructure can scan this assembly for MediatR handlers and
+// FluentValidation validators (both `internal` per the vertical-slice convention) by assembly
+// reference, without referencing any of those internal types by name.
+public sealed class ApplicationAssemblyMarker;

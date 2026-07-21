@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "dotnet-ddd",
   "displayName": "DDD Modular Monolith (.NET)",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Scaffold and review a DDD, vertically-sliced modular monolith in .NET using MediatR and MassTransit.",
   "author": { "name": "adamm931" },
   "repository": "https://github.com/adamm931/claude-skills",

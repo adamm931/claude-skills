@@ -1,8 +1,11 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using {{Sln}}.{{Name}}.Application;
 
-namespace {{Sln}}.{{Name}}; // Application project
+namespace {{Sln}}.{{Name}}.Infrastructure; // must be Infrastructure — {{Name}}DbContext is internal,
+                                            // so the type is only visible within its own assembly
 
 public static class {{Name}}Module
 {
@@ -15,7 +18,13 @@ public static class {{Name}}Module
         // s.AddScoped<I{{Name}}Service, {{Name}}Service>();
         // s.AddScoped<I{{Aggregate}}Repository, {{Aggregate}}Repository>();
 
-        s.AddMediatR(c => c.RegisterServicesFromAssembly(typeof({{Name}}Module).Assembly));
+        // Handlers/validators live in the Application assembly, not this one — scan via the
+        // marker type, not typeof({{Name}}Module), which would scan the wrong (empty) assembly.
+        // includeInternalTypes: true — validators are `internal` per the vertical-slice convention;
+        // without this flag they're silently never registered (see vertical-slice skill).
+        s.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(ApplicationAssemblyMarker).Assembly));
+        s.AddValidatorsFromAssembly(typeof(ApplicationAssemblyMarker).Assembly, includeInternalTypes: true);
+
         return s;
     }
 }
