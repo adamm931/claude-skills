@@ -1,0 +1,15 @@
+import { z } from 'zod';
+import type { IRequest } from '../../../shared-kernel';
+
+// src/modules/{{module}}/application/features/{{useCase}}/{{useCase}}.command.ts
+
+export const {{useCase}}Schema = z.object({
+  // {{ZodFields}}
+});
+
+export type {{UseCase}}Input = z.infer<typeof {{useCase}}Schema>;
+
+export class {{UseCase}}Command implements IRequest<{{Response}}> {
+  declare readonly _response?: {{Response}};
+  constructor(public readonly input: {{UseCase}}Input) {}
+}

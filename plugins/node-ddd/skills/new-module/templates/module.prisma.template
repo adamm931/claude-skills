@@ -1,0 +1,28 @@
+// prisma/schema/{{name}}.prisma — requires the `multiSchema` preview feature and
+// `schemas = [..., "{{name}}"]` on the datasource block in prisma/schema/schema.prisma.
+
+model {{Aggregate}} {
+  id String @id @default(uuid())
+  // ...fields
+
+  @@schema("{{name}}")
+}
+
+// Staged in the same transaction as the aggregate write; relayed by the outbox poller.
+model OutboxMessage {
+  id          String    @id @default(uuid())
+  eventType   String
+  payload     Json
+  occurredAt  DateTime  @default(now())
+  publishedAt DateTime?
+
+  @@schema("{{name}}")
+}
+
+// Dedupe table for consumers of OTHER modules' integration events — keyed on the source event id.
+model InboxMessage {
+  eventId     String   @id
+  processedAt DateTime @default(now())
+
+  @@schema("{{name}}")
+}

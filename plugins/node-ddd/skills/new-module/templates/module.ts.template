@@ -1,0 +1,8 @@
+import type { PrismaClient } from '@prisma/client';
+import type { Mediator } from '../../shared-kernel';
+
+// src/modules/{{name}}/{{name}}.module.ts — public composition root for this module.
+export function register{{Name}}Module(mediator: Mediator, prisma: PrismaClient): void {
+  // const repo = new {{Aggregate}}Repository(prisma);
+  // mediator.register({{UseCase}}Command, new {{UseCase}}Handler(repo));
+}

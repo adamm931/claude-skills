@@ -1,0 +1,17 @@
+/**
+ * Enforces module boundaries: src/modules/<name>/(domain|application|infrastructure) is internal to
+ * that module. Other modules may only import src/modules/<name>/public.
+ *
+ * The `new-module` skill appends one `forbidden` rule per module here — see its SKILL.md.
+ */
+module.exports = {
+  forbidden: [
+    // { name: 'no-cross-module-internals-<name>',
+    //   severity: 'error',
+    //   from: { pathNot: '^src/modules/<name>/' },
+    //   to: { path: '^src/modules/<name>/(domain|application|infrastructure)/' } },
+  ],
+  options: {
+    tsConfig: { fileName: 'tsconfig.json' },
+  },
+};

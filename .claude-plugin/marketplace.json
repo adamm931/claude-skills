@@ -8,6 +8,11 @@
       "description": "DDD modular monolith scaffolding and review for .NET, using MediatR and MassTransit."
     },
     {
+      "name": "node-ddd",
+      "source": "./plugins/node-ddd",
+      "description": "DDD modular monolith scaffolding and review for Node.js/TypeScript, using a hand-rolled mediator, Prisma, and the outbox pattern."
+    },
+    {
       "name": "api-spec",
       "source": "./plugins/api-spec",
       "description": "Write API specs (REST, GraphQL) as versioned, decision-recording iteration docs."
