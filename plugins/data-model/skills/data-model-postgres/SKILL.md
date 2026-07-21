@@ -35,6 +35,9 @@ Same shape as the SQL Server variant — this section order is engine-agnostic:
 6. **Local database** — pin the image tag (`postgres:16.4`, not `postgres:latest` or bare `16`).
 7. **Seed data** — kept OUT of migrations, never journaled, idempotent via a reserved id
    range/prefix the script owns (delete-then-reinsert those rows only, never a blanket `DELETE`).
+   Default to a minimum of 5 rows per table unless the user specifies a different count — enough to
+   exercise list pagination, filters, and joins without every query degenerating to a 1-row trivial
+   case. Fewer than 5 is fine only if the user asks for a smaller/minimal seed explicitly.
 8. **Schema verification** — an independent check that the end state is correct, not just that
    migrations exited 0 — `IF NOT EXISTS` guards make scripts safely re-runnable but also let one
    silently no-op against a partially-built database.

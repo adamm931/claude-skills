@@ -41,7 +41,10 @@ Pairs one-to-one with an API spec (see the `api-spec` plugin): same iteration nu
 7. **Seed data** — kept OUT of the migrations folder, never journaled (a migration's contract is
    "runs exactly once, forever"; seed data's contract is the opposite — must be re-runnable). Idempotent
    via a reserved ID prefix/range the seed script owns and deletes-then-reinserts, never a blanket
-   `DELETE FROM`.
+   `DELETE FROM`. Default to a minimum of 5 rows per table unless the user specifies a different
+   count — enough to exercise list pagination, filters, and joins without every query degenerating to
+   a 1-row trivial case. Fewer than 5 is fine only if the user asks for a smaller/minimal seed
+   explicitly.
 8. **Schema verification** — an independent check (a small tool/script asserting every expected
    table/constraint/index exists) that restates what the migrations create. Worth calling out
    explicitly: `IF NOT EXISTS` guards make migrations safe to re-run but also let a script silently
