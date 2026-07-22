@@ -1,23 +1,50 @@
-// src/lib/logger.js — minimal structured logger + a request-logging middleware.
-// Swap the internals for pino in production; the interface stays the same.
+// src/lib/logger.js — Winston logger with TWO transports: a colorized, human-readable
+// Console (great for `debug` while developing) and a rolling daily FILE (structured JSON,
+// for prod/audit). Everything is driven by `config.log` (env), so level, directory, rotation
+// size and retention are changed via .env — never in code. Plain functional module, no class.
 
-const log = (level, msg, meta) =>
-  console[level === 'error' ? 'error' : 'log'](
-    JSON.stringify({ t: new Date().toISOString(), level, msg, ...meta }),
-  );
+import winston from 'winston';
+import 'winston-daily-rotate-file'; // registers winston.transports.DailyRotateFile
+import { config } from '#/lib/config.js';
 
-export const logger = {
-  info: (msg, meta) => log('info', msg, meta),
-  warn: (msg, meta) => log('warn', msg, meta),
-  error: (msg, meta) => log('error', msg, meta),
-};
+const { combine, timestamp, json, printf, colorize, errors } = winston.format;
+
+// Console: `HH:mm:ss.SSS level message {meta}` — readable at a glance.
+const consoleFormat = combine(
+  colorize(),
+  timestamp({ format: 'HH:mm:ss.SSS' }),
+  printf(({ level, message, timestamp: ts, stack, ...meta }) => {
+    const rest = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+    return `${ts} ${level} ${stack || message}${rest}`;
+  }),
+);
+
+// File: structured JSON with full timestamps + error stacks, one rolling file per day.
+const fileFormat = combine(timestamp(), errors({ stack: true }), json());
+
+export const logger = winston.createLogger({
+  level: config.log.level, // 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly'
+  transports: [
+    new winston.transports.Console({ format: consoleFormat }),
+    new winston.transports.DailyRotateFile({
+      dirname: config.log.dir, // e.g. logs/
+      filename: 'app-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: config.log.zip, // gzip rotated files
+      maxSize: config.log.maxSize, // e.g. '20m' — roll when a file exceeds this
+      maxFiles: config.log.maxFiles, // e.g. '14d' — keep this long, then delete
+      format: fileFormat,
+    }),
+  ],
+});
 
 /** Express middleware: log method, path, status, and duration once the response finishes. */
 export const requestLogger = (req, res, next) => {
   const start = process.hrtime.bigint();
   res.on('finish', () => {
     const ms = Number(process.hrtime.bigint() - start) / 1e6;
-    logger.info('request', { method: req.method, path: req.originalUrl, status: res.statusCode, ms });
+    // `http` level so request noise can be silenced independently of app `info` logs.
+    logger.http('request', { method: req.method, path: req.originalUrl, status: res.statusCode, ms });
   });
   next();
 };

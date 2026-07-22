@@ -1,13 +1,26 @@
 // src/data/{{resource}}.repository.js — the data layer for {{resource}}. The ONLY place that
-// runs SQL for this resource. Parameterized queries only ($1, $2). Returns plain objects;
-// no business rules, no knowledge of HTTP. Use `withTransaction` for multi-statement writes.
+// runs SQL for this resource. Parameterized queries only ($1, $2). Returns plain objects; no
+// business rules, no knowledge of HTTP. Use `withTransaction` for multi-statement writes.
 
-import { query } from './pool.js';
+import { query } from '#/data/pool.js';
+import { buildListQuery } from '#/lib/query-params.js';
 
 const TABLE = '{{resource}}';
 
-export const findAll = () =>
-  query(`select * from ${TABLE} order by id`);
+// Public field name -> real SQL column (the whitelist buildListQuery uses for sort/filter).
+// Only fields listed here can be sorted/filtered; user input never becomes an identifier.
+const COLUMNS = {
+  id: 'id',
+  // name: 'name', createdAt: 'created_at',
+};
+
+/** Paginated + filtered + sorted list. @returns { rows, total } */
+export const findMany = async (spec) => {
+  const { sql, params, countSql, countParams } = buildListQuery(TABLE, COLUMNS, spec);
+  const rows = await query(sql, params);
+  const [{ total }] = await query(countSql, countParams);
+  return { rows, total };
+};
 
 export const findById = async (id) => {
   const rows = await query(`select * from ${TABLE} where id = $1`, [id]);

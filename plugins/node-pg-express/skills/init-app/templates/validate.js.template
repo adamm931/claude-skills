@@ -1,6 +1,43 @@
-// src/lib/validate.js — small helpers to parse request parts against a Zod schema at the API
-// edge. A failed parse throws a ZodError, which the error middleware turns into a 400. Keep
-// validation in the route handler (the edge); services receive already-clean data.
+// src/lib/validate.js — JSON Schema request validation via Ajv. The router calls `compileSchema`
+// once per route (at boot) with the route's schema.json, and inserts the returned middleware
+// before the handler. A schema.json may contain any of these parts, each a JSON Schema:
+//
+//   { "headers": {...}, "params": {...}, "query": {...}, "body": {...} }
+//
+// Ajv is configured to COERCE types (query/params/headers arrive as strings) and apply schema
+// `default`s, so `req.valid.<part>` is clean, typed data. We validate a CLONE of each part (never
+// mutating req.query — Express 5 makes it a read-only getter). A failure -> 400 with per-field details.
 
-/** Parse and return validated data, or throw ZodError. Use for req.body / req.query / req.params. */
-export const parse = (schema, data) => schema.parse(data);
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+import { validationError } from '#/lib/errors.js';
+
+const ajv = new Ajv({ coerceTypes: true, useDefaults: true, allErrors: true });
+addFormats(ajv); // enables "format": "email" | "uuid" | "date-time" | "uri" | ...
+
+const PARTS = ['headers', 'params', 'query', 'body'];
+
+/** Compile a route's schema.json into an Express middleware. Called once per route at startup. */
+export const compileSchema = (schema) => {
+  const validators = {};
+  for (const part of PARTS) {
+    if (schema[part]) validators[part] = ajv.compile(schema[part]);
+  }
+
+  return (req, res, next) => {
+    req.valid = req.valid || {};
+    const errors = [];
+    for (const part of PARTS) {
+      const check = validators[part];
+      const data = { ...req[part] }; // clone: Ajv coerces/defaults in place
+      if (check && !check(data)) {
+        for (const e of check.errors) {
+          errors.push({ part, path: e.instancePath || '/', message: e.message });
+        }
+      }
+      req.valid[part] = check ? data : req[part];
+    }
+    if (errors.length) return next(validationError(errors));
+    next();
+  };
+};

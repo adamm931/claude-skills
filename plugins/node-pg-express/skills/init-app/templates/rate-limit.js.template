@@ -1,0 +1,45 @@
+// src/lib/rate-limit.js — fixed-window rate limiter, applied GLOBALLY in app.js. Keyed by the
+// client (the `x-api-key` header if present, else `req.ip`), so it caps a client's total request
+// rate across the whole API.
+//
+// In-memory / single-process: correct for one instance. Running multiple instances or behind
+// autoscaling? Swap the `buckets` Map for a shared store (Redis INCR + EXPIRE) — the middleware
+// shape stays the same.
+
+import { tooManyRequests } from '#/lib/errors.js';
+
+const buckets = new Map(); // clientKey -> { count, resetAt }
+
+const UNITS = { ms: 1, s: 1e3, m: 60e3, h: 36e5 };
+const parseWindow = (w) => {
+  if (typeof w === 'number') return w;
+  const m = /^(\d+)(ms|s|m|h)$/.exec(w);
+  if (!m) throw new Error(`Invalid rate-limit window: ${w}`);
+  return Number(m[1]) * UNITS[m[2]];
+};
+
+/** `rateLimit({ window:'1m', max:100 })` -> middleware. */
+export const rateLimit = ({ window = '1m', max = 100 } = {}) => {
+  const windowMs = parseWindow(window);
+  return (req, res, next) => {
+    const key = req.get('x-api-key') || req.ip;
+    const now = Date.now();
+
+    let bucket = buckets.get(key);
+    if (!bucket || now > bucket.resetAt) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      buckets.set(key, bucket);
+    }
+    bucket.count += 1;
+
+    res.set('X-RateLimit-Limit', String(max));
+    res.set('X-RateLimit-Remaining', String(Math.max(0, max - bucket.count)));
+    res.set('X-RateLimit-Reset', String(Math.ceil(bucket.resetAt / 1000)));
+
+    if (bucket.count > max) {
+      res.set('Retry-After', String(Math.ceil((bucket.resetAt - now) / 1000)));
+      return next(tooManyRequests('Rate limit exceeded'));
+    }
+    next();
+  };
+};

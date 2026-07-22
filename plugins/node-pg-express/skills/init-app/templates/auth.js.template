@@ -1,0 +1,30 @@
+// src/lib/auth.js — v1 authentication: a single API key from env, checked against the
+// `x-api-key` header. Applied GLOBALLY in app.js (secure by default): every request needs a
+// valid key EXCEPT paths on the public allowlist (e.g. /health). Public unless allow-listed.
+//
+// Later (JWT): replace this with a token-verifying middleware that sets `req.user`; app.js keeps
+// wiring it globally, and the public allowlist still applies.
+
+import { timingSafeEqual } from 'node:crypto';
+import { config } from '#/lib/config.js';
+import { unauthorized } from '#/lib/errors.js';
+
+// Constant-time compare so a wrong key can't be guessed byte-by-byte via timing.
+const safeEqual = (a, b) => {
+  const ba = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return ba.length === bb.length && timingSafeEqual(ba, bb);
+};
+
+const isPublic = (path, publicPaths) =>
+  publicPaths.some((p) => path === p || path.startsWith(`${p}/`));
+
+/** Global API-key auth. `apiKeyAuth({ publicPaths: ['/health'] })` -> middleware. */
+export const apiKeyAuth = ({ publicPaths = [] } = {}) => (req, res, next) => {
+  if (isPublic(req.path, publicPaths)) return next();
+  const key = req.get('x-api-key');
+  if (!key || !safeEqual(key, config.apiKey)) {
+    return next(unauthorized('Invalid or missing API key'));
+  }
+  next();
+};

@@ -18,6 +18,7 @@ to install everything, just what a given machine/workflow needs:
 ```bash
 /plugin install dotnet-ddd@claude-skills
 /plugin install node-ddd@claude-skills
+/plugin install node-pg-express@claude-skills
 /plugin install api-spec@claude-skills
 /plugin install data-model@claude-skills
 /plugin install postgres-ops@claude-skills
@@ -61,6 +62,7 @@ collisions between plugins):
 |---|---|---|
 | [`dotnet-ddd`](plugins/dotnet-ddd) | dotnet-setup, architecture-rules, init-ddd, new-module, vertical-slice, integration-event, aggregate-design | DDD modular monolith scaffolding and review for .NET (MediatR + MassTransit) |
 | [`node-ddd`](plugins/node-ddd) | node-setup, architecture-rules, init-ddd, new-module, vertical-slice, integration-event, aggregate-design | DDD modular monolith scaffolding and review for Node.js/TypeScript (hand-rolled mediator + Prisma + outbox) |
+| [`node-pg-express`](plugins/node-pg-express) | architecture-rules, node-setup, init-app, new-resource, request-validation, auth, rate-limiting, idempotency, list-queries, responses, logging | Layered (api → services → data) plain-JS REST API: folder-per-method file-based routing on Express + raw pg, JSON Schema (Ajv) validation via schema.json, global api-key auth + rate-limit, idempotency, pagination/HATEOAS, Winston logging |
 | [`api-spec`](plugins/api-spec) | api-spec-rest ✅, api-spec-graphql (planned) | Write API specs as versioned, decision-recording iteration docs |
 | [`data-model`](plugins/data-model) | data-model-mssql ✅, data-model-postgres ✅ | Write data-layer specs (schema, indexes, migrations) as versioned iteration docs |
 | [`postgres-ops`](plugins/postgres-ops) | postgres-setup, postgres-up, postgres-down, postgres-status, postgres-logs, postgres-reset, postgres-query, postgres-backup | Scaffold a project-local Dockerized Postgres and operate it day-to-day |

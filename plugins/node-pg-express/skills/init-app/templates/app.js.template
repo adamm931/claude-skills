@@ -1,23 +1,38 @@
-// src/app.js — builds the Express app: global middleware, the file-based router, then the
-// single error handler LAST. Exported separately from server.js so tests can import the app
-// without opening a port.
+// src/app.js — builds the Express app: query parser, global middleware (logging, response
+// helpers, GLOBAL API-key auth + rate limit), the file-based router, then the single error
+// handler LAST. Exported separately from server.js so tests can import the app without a port.
 
 import express from 'express';
-import { buildRouter } from './router.js';
-import { requestLogger } from './lib/logger.js';
-import { errorMiddleware } from './lib/error-middleware.js';
+import { buildRouter } from '#/router.js';
+import { config } from '#/lib/config.js';
+import { requestLogger } from '#/lib/logger.js';
+import { responder } from '#/lib/respond.js';
+import { apiKeyAuth } from '#/lib/auth.js';
+import { rateLimit } from '#/lib/rate-limit.js';
+import { errorMiddleware } from '#/lib/error-middleware.js';
+
+// Paths reachable WITHOUT an API key. Everything else requires `x-api-key`.
+const PUBLIC_PATHS = ['/health'];
 
 export async function createApp() {
   const app = express();
 
+  // 'extended' so nested list filters parse: ?filter[status]=active -> req.query.filter.status
+  app.set('query parser', 'extended');
+
   app.use(express.json());
   app.use(requestLogger);
+  app.use(responder); // res.ok / res.created / res.page / res.noContent
+
+  // Global cross-cutting concerns (auth + rate limit are app-wide, not per-route).
+  app.use(rateLimit(config.rateLimit));
+  app.use(apiKeyAuth({ publicPaths: PUBLIC_PATHS }));
 
   // Mount the file-based routes (built once from src/api/).
   app.use(await buildRouter());
 
   // 404 for anything unmatched, then the error handler — both MUST be last.
-  app.use((req, res) => res.status(404).json({ error: 'Not Found' }));
+  app.use((req, res) => res.status(404).json({ data: null, message: { status: 404, type: 'error', text: 'Not Found' } }));
   app.use(errorMiddleware);
 
   return app;

@@ -16,7 +16,7 @@ fi
 # Layer-boundary check: the API layer must never import the pg Pool or write SQL directly;
 # the data layer must never import Express. Cheap grep guardrails (advisory, non-fatal).
 if [ -d src/api ]; then
-  if grep -rnE "from '.*data/pool" src/api 2>/dev/null; then
+  if grep -rnE "from '#?/?.*data/pool" src/api 2>/dev/null; then
     echo "verify: WARNING — src/api imports the pg Pool. Routes must call a service, not the data layer." >&2
   fi
 fi

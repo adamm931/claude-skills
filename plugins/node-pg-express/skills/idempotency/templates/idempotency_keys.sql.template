@@ -1,0 +1,13 @@
+-- Migration: idempotency keys. Required by src/lib/idempotency.js.
+-- Stores the first successful response for an (Idempotency-Key) so retries replay it.
+create table if not exists idempotency_keys (
+  key         text primary key,
+  method      text        not null,
+  path        text        not null,
+  status      int         not null,
+  body        jsonb,
+  created_at  timestamptz not null default now()
+);
+
+-- Optional: reap old keys (e.g. a daily job deleting rows older than 24h).
+-- delete from idempotency_keys where created_at < now() - interval '24 hours';

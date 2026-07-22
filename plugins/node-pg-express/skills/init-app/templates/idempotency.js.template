@@ -1,0 +1,42 @@
+// src/lib/idempotency.js — idempotency for unsafe methods (POST/PUT/PATCH). A reusable shared
+// middleware; a route opts in with `export const middleware = [idempotency]`. The client sends
+// an `Idempotency-Key` header; the first successful completion is stored, and any replay with
+// the same key returns the stored status + body instead of running the handler again.
+//
+// Requires the `idempotency_keys` table (see the idempotency skill's migration). Single-table,
+// best-effort: good for one instance; add a unique-key insert-first lock for strict guarantees.
+
+import { query } from '#/data/pool.js';
+
+export const idempotency = async (req, res, next) => {
+  const key = req.get('idempotency-key');
+  if (!key) return next(); // no key -> not deduped. Require it in the handler if you must.
+
+  const method = req.method;
+  const path = req.originalUrl;
+
+  const existing = await query(
+    'select status, body from idempotency_keys where key = $1 and method = $2 and path = $3',
+    [key, method, path],
+  );
+  if (existing[0]) {
+    return res.status(existing[0].status).json(existing[0].body);
+  }
+
+  // Capture the response body, then persist it once the response has been sent.
+  const sendJson = res.json.bind(res);
+  res.json = (body) => {
+    res.locals.body = body;
+    return sendJson(body);
+  };
+  res.on('finish', () => {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      query(
+        `insert into idempotency_keys (key, method, path, status, body)
+         values ($1, $2, $3, $4, $5) on conflict (key) do nothing`,
+        [key, method, path, res.statusCode, res.locals.body ?? null],
+      ).catch(() => {});
+    }
+  });
+  next();
+};

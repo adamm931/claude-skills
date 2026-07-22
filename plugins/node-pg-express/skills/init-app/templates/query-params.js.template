@@ -1,0 +1,63 @@
+// src/lib/query-params.js — list query params: pagination, sorting, filtering — parsed and
+// WHITELISTED. JSON Schema (in the route's schema.json) validates the raw shape/types of
+// ?page=&pageSize=&sort=&filter[field]=; these helpers then apply the business rules JSON Schema
+// can't express — the sort/filter field whitelist and the SQL construction.
+//
+//   parseListQuery(req.valid.query, { sortable, filterable })
+//     -> { page, pageSize, sort:[{field,dir}], filters:[{field,value}] }   (throws 400 off-whitelist)
+//   buildListQuery(table, columns, spec)
+//     -> { sql, params, countSql, countParams }   (parameterized; only whitelisted columns as identifiers)
+
+import { badRequest } from '#/lib/errors.js';
+
+/** Turn validated raw query params into a safe spec, rejecting non-whitelisted sort/filter fields. */
+export const parseListQuery = (query, { sortable = [], filterable = [] } = {}) => {
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? 20;
+
+  const sort = [];
+  for (const token of query.sort ? String(query.sort).split(',') : []) {
+    const desc = token.startsWith('-');
+    const field = desc ? token.slice(1) : token;
+    if (!sortable.includes(field)) throw badRequest(`Cannot sort by '${field}'`);
+    sort.push({ field, dir: desc ? 'desc' : 'asc' });
+  }
+
+  const filters = [];
+  for (const [field, value] of Object.entries(query.filter ?? {})) {
+    if (!filterable.includes(field)) throw badRequest(`Cannot filter by '${field}'`);
+    filters.push({ field, value });
+  }
+
+  return { page, pageSize, sort, filters };
+};
+
+/**
+ * Build a safe, parameterized list query from a parsed spec.
+ * @param {string} table
+ * @param {Record<string,string>} columns  public field -> real column name (the whitelist)
+ */
+export const buildListQuery = (table, columns, spec) => {
+  const params = [];
+  const where = [];
+  for (const f of spec.filters) {
+    params.push(f.value);
+    where.push(`${columns[f.field]} = $${params.length}`); // column from whitelist, value parameterized
+  }
+  const whereSql = where.length ? `where ${where.join(' and ')}` : '';
+
+  const order = spec.sort.length
+    ? `order by ${spec.sort.map((s) => `${columns[s.field]} ${s.dir === 'desc' ? 'desc' : 'asc'}`).join(', ')}`
+    : 'order by id';
+
+  const countSql = `select count(*)::int as total from ${table} ${whereSql}`;
+  const countParams = [...params];
+
+  params.push(spec.pageSize);
+  const limit = `$${params.length}`;
+  params.push((spec.page - 1) * spec.pageSize);
+  const offset = `$${params.length}`;
+
+  const sql = `select * from ${table} ${whereSql} ${order} limit ${limit} offset ${offset}`;
+  return { sql, params, countSql, countParams };
+};

@@ -1,0 +1,11 @@
+{
+  "body": {
+    "type": "object",
+    "required": ["{{RequiredField}}"],
+    "additionalProperties": false,
+    "properties": {
+      "name": { "type": "string", "minLength": 1 },
+      "email": { "type": "string", "format": "email" }
+    }
+  }
+}

@@ -3,7 +3,7 @@
 // ways the data layer talks to Postgres.
 
 import pg from 'pg';
-import { config } from '../lib/config.js';
+import { config } from '#/lib/config.js';
 
 export const pool = new pg.Pool({
   connectionString: config.databaseUrl,

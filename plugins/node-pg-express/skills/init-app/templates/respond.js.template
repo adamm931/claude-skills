@@ -1,0 +1,71 @@
+// src/lib/respond.js — the response envelope. ONE consistent shape for every response:
+//
+//   single:  { data: {...}, links: { self:{method,href}, ... }, message: { status, type, text } }
+//   list:    { data: [...], pagination: {...}, message: { status, type, text } }
+//   error:   { data: null,  message: { status, type:'error', text } }   (see error-middleware.js)
+//
+// `responder` is registered as middleware in app.js and decorates `res` with helpers so route
+// handlers never assemble the envelope by hand.
+
+const origin = (req) => `${req.protocol}://${req.get('host')}`;
+
+const success = (status) => ({ status, type: 'success', text: status === 201 ? 'Created' : 'OK' });
+
+// Expand a links map { self: ['GET','/customers/1'], update: ['PUT','/customers/1'] }
+// into { self: { method:'GET', href:'https://host/customers/1' }, ... }. A bare string is GET.
+const expandLinks = (req, links) => {
+  if (!links) return undefined;
+  const base = origin(req);
+  const out = {};
+  for (const [rel, val] of Object.entries(links)) {
+    if (!val) { out[rel] = null; continue; }
+    const [method, path] = Array.isArray(val) ? val : ['GET', val];
+    out[rel] = { method, href: path.startsWith('http') ? path : base + path };
+  }
+  return out;
+};
+
+// Build the pagination block (+ page links) from the current request URL and totals.
+const buildPagination = (req, { page, pageSize, total }) => {
+  const totalPages = pageSize > 0 ? Math.ceil(total / pageSize) : 0;
+  const url = new URL(req.originalUrl, origin(req));
+  const pageUrl = (p) => {
+    if (p < 1 || (totalPages && p > totalPages)) return null;
+    const u = new URL(url);
+    u.searchParams.set('page', String(p));
+    u.searchParams.set('pageSize', String(pageSize));
+    return u.toString();
+  };
+  return {
+    page,
+    pageSize,
+    total,
+    totalPages,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+    links: {
+      self: pageUrl(page),
+      first: pageUrl(1),
+      last: totalPages ? pageUrl(totalPages) : null,
+      next: pageUrl(page + 1),
+      prev: pageUrl(page - 1),
+    },
+  };
+};
+
+/** Express middleware: attach envelope helpers to `res`. Register before the router. */
+export const responder = (req, res, next) => {
+  // Single item. `links` is a map of operation -> ['METHOD','/path'] (or a bare '/path' = GET).
+  res.ok = (data, links, status = 200) =>
+    res.status(status).json({ data, links: expandLinks(req, links), message: success(status) });
+
+  res.created = (data, links) => res.ok(data, links, 201);
+
+  // Paginated list. `pagination` = { page, pageSize, total }.
+  res.page = (data, pagination) =>
+    res.status(200).json({ data, pagination: buildPagination(req, pagination), message: success(200) });
+
+  res.noContent = () => res.status(204).end();
+
+  next();
+};

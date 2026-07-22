@@ -17,8 +17,19 @@ REST API. Check the diff for violations:
 - A repository (data layer) containing business rules, or importing a service (dependency direction
   must stay api -> services -> data, never backwards).
 - SQL built by string-concatenating user input instead of parameterized `$1, $2` queries — flag as a
-  potential injection.
+  potential injection. In list queries, sort/filter fields reaching SQL without going through the
+  `COLUMNS` whitelist (`buildListQuery`).
 - A `class` keyword anywhere (the project is strictly functional).
 - Multi-statement writes not wrapped in a transaction helper.
+- Input validated inline in a handler instead of via a sibling `schema.json` (JSON Schema); reading
+  `req.body`/`req.query` instead of the validated `req.valid.*`; a second validation library (Zod)
+  instead of Ajv.
+- Auth or rate limit wired per-route instead of globally in `app.js`; idempotency applied by anything
+  other than a route's `export const middleware = [idempotency]`.
+- Responses built with a bare `res.json(...)` instead of the `res.ok`/`res.created`/`res.page`
+  envelope helpers; error bodies formatted in a handler instead of thrown as a `lib/errors.js` factory.
+- Relative `../../..` imports for internal modules instead of the `#/` alias.
+- A `route.js` not inside a method folder (get/post/put/patch/delete), or missing its `export default`
+  handler.
 
 Report each finding with file, the rule broken, and the minimal fix. Read-only: propose, don't edit.

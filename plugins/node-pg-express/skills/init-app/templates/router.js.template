@@ -1,50 +1,79 @@
-// src/router.js — file-based router. Walks src/api/ ONCE at startup and builds an Express
-// Router from the folder tree. A folder is a URL segment; `[param]` -> `:param`; each
-// `route.js` exports handler fns named by HTTP method (GET/POST/PUT/PATCH/DELETE).
-// There is no manual route table: add a folder + route.js and the route exists.
+// src/router.js — file-based, folder-per-method router. Walks src/api/ ONCE at startup and
+// builds an Express Router from the folder tree. Convention:
+//
+//   src/api/customers/get/route.js        -> GET    /customers
+//   src/api/customers/post/route.js       -> POST   /customers
+//   src/api/customers/[id]/get/route.js   -> GET    /customers/:id
+//   src/api/customers/[id]/delete/route.js-> DELETE /customers/:id
+//
+// The LAST folder is the HTTP method (get/post/put/patch/delete) — it is NOT part of the URL.
+// A `[param]` folder becomes `:param`. Each method folder holds:
+//   - route.js      : `export default (req,res)=>{}` (the handler) + optional
+//                     `export const middleware = [ ... ]` (reusable per-route middleware, e.g. idempotency)
+//   - schema.json   : (optional) JSON Schema for input — { headers, params, query, body } — validated by Ajv
+//
+// Global concerns (API-key auth, rate limiting) are applied once in app.js, not here.
 
-import { readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, statSync, existsSync, readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname } from 'node:path';
 import { Router } from 'express';
-import { asyncHandler } from './lib/async-handler.js';
+import { asyncHandler } from '#/lib/async-handler.js';
+import { compileSchema } from '#/lib/validate.js';
 
-const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const METHODS = new Set(['get', 'post', 'put', 'patch', 'delete']);
 const API_DIR = join(dirname(fileURLToPath(import.meta.url)), 'api');
 
 // [id] -> :id (dynamic segment); anything else stays literal.
 const toSegment = (name) =>
   name.startsWith('[') && name.endsWith(']') ? `:${name.slice(1, -1)}` : name;
 
-// Recursively collect every route.js under `dir`, remembering its URL path.
+// Recursively collect every route.js, remembering the URL path built from its folders.
 function collect(dir, base = '') {
-  const routes = [];
+  const files = [];
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      routes.push(...collect(full, `${base}/${toSegment(entry)}`));
+      files.push(...collect(full, `${base}/${toSegment(entry)}`));
     } else if (entry === 'route.js') {
-      routes.push({ file: full, path: base || '/' });
+      files.push({ file: full, base });
     }
   }
-  return routes;
+  return files;
 }
 
 /** Build the app's Express Router from the folder tree under src/api/. */
 export async function buildRouter() {
   const router = Router();
-  // Sort so more specific paths register in a stable order.
-  const routes = collect(API_DIR).sort((a, b) => a.path.localeCompare(b.path));
+  const files = collect(API_DIR).sort((a, b) => a.base.localeCompare(b.base));
 
-  for (const { file, path } of routes) {
-    const mod = await import(pathToFileURL(file).href);
-    for (const method of METHODS) {
-      const handler = mod[method];
-      if (typeof handler === 'function') {
-        router[method.toLowerCase()](path, asyncHandler(handler));
-      }
+  for (const { file, base } of files) {
+    // The last path segment is the HTTP method; the rest is the URL.
+    const cut = base.lastIndexOf('/');
+    const method = base.slice(cut + 1).toLowerCase();
+    const path = base.slice(0, cut) || '/';
+    if (!METHODS.has(method)) {
+      console.warn(`router: skipping ${file} — parent folder '${method}' is not an HTTP method`);
+      continue;
     }
+
+    const mod = await import(pathToFileURL(file).href);
+    const handler = mod.default;
+    if (typeof handler !== 'function') {
+      console.warn(`router: skipping ${file} — no default-exported handler`);
+      continue;
+    }
+    const routeMiddleware = Array.isArray(mod.middleware) ? mod.middleware : [];
+
+    // Sibling schema.json -> a validation middleware (runs before route middleware + handler).
+    const chain = [];
+    const schemaFile = join(dirname(file), 'schema.json');
+    if (existsSync(schemaFile)) {
+      chain.push(compileSchema(JSON.parse(readFileSync(schemaFile, 'utf8'))));
+    }
+    chain.push(...routeMiddleware, asyncHandler(handler));
+
+    router[method](path, ...chain);
   }
   return router;
 }

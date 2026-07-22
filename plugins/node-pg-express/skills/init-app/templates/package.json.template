@@ -4,14 +4,20 @@
   "private": true,
   "type": "module",
   "engines": { "node": ">=20" },
+  "imports": {
+    "#/*": "./src/*"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test"
   },
   "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "express": "^5.1.0",
     "pg": "^8.13.0",
-    "zod": "^3.24.0"
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   }
 }

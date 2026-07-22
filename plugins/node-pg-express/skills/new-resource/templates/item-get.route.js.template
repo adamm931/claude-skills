@@ -1,0 +1,15 @@
+// src/api/{{resource}}/[id]/get/route.js -> GET /{{resource}}/:id   (single item)
+// `[id]` folder -> `:id`; `get` folder = GET. schema.json validates+coerces the :id param.
+// Returns HATEOAS `links` for the operations a client can perform on this resource.
+
+import * as {{resource}}Service from '#/services/{{resource}}.service.js';
+
+export default async (req, res) => {
+  const { id } = req.valid.params;
+  const item = await {{resource}}Service.getById(id); // throws notFound() if missing
+  res.ok(item, {
+    self: ['GET', `/{{resource}}/${id}`],
+    update: ['PUT', `/{{resource}}/${id}`],
+    delete: ['DELETE', `/{{resource}}/${id}`],
+  });
+};

@@ -1,0 +1,10 @@
+// src/api/{{resource}}/[id]/delete/route.js -> DELETE /{{resource}}/:id
+// schema.json validates the :id param. 204 on success.
+
+import * as {{resource}}Service from '#/services/{{resource}}.service.js';
+
+export default async (req, res) => {
+  const { id } = req.valid.params;
+  await {{resource}}Service.remove(id);
+  res.noContent();
+};

@@ -1,24 +1,54 @@
-// src/lib/config.js — parse + validate environment ONCE at startup, fail fast if invalid.
+// src/lib/config.js — parse + validate environment ONCE at startup with Ajv (the same JSON
+// Schema validator used for requests — no second validation library). Fails fast if invalid.
 // Everything downstream imports `config`, never `process.env` directly.
 
-import { z } from 'zod';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 
-const schema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(3000),
-  DATABASE_URL: z.string().url(),
-  PG_POOL_MAX: z.coerce.number().default(10),
-});
+const ajv = new Ajv({ coerceTypes: true, useDefaults: true, allErrors: true });
+addFormats(ajv);
 
-const parsed = schema.safeParse(process.env);
-if (!parsed.success) {
-  console.error('Invalid environment:', parsed.error.flatten().fieldErrors);
+const schema = {
+  type: 'object',
+  properties: {
+    NODE_ENV: { enum: ['development', 'test', 'production'], default: 'development' },
+    PORT: { type: 'integer', default: 3000 },
+    DATABASE_URL: { type: 'string', format: 'uri' },
+    PG_POOL_MAX: { type: 'integer', default: 10 },
+    // v1 auth: a single API key checked against the `x-api-key` header (global middleware).
+    API_KEY: { type: 'string', minLength: 1 },
+    // Global rate limit (applied in app.js).
+    RATE_LIMIT_WINDOW: { type: 'string', default: '1m' },
+    RATE_LIMIT_MAX: { type: 'integer', default: 100 },
+    // Logging (Winston): env-driven so logging is tuned without code changes.
+    LOG_LEVEL: { enum: ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'], default: 'info' },
+    LOG_DIR: { type: 'string', default: 'logs' },
+    LOG_MAX_SIZE: { type: 'string', default: '20m' },
+    LOG_MAX_FILES: { type: 'string', default: '14d' },
+    LOG_ZIP: { type: 'boolean', default: false },
+  },
+  required: ['DATABASE_URL', 'API_KEY'],
+};
+
+const env = { ...process.env }; // clone: Ajv coerces/defaults in place
+const validate = ajv.compile(schema);
+if (!validate(env)) {
+  console.error('Invalid environment:', validate.errors);
   process.exit(1);
 }
 
 export const config = Object.freeze({
-  env: parsed.data.NODE_ENV,
-  port: parsed.data.PORT,
-  databaseUrl: parsed.data.DATABASE_URL,
-  pgPoolMax: parsed.data.PG_POOL_MAX,
+  env: env.NODE_ENV,
+  port: env.PORT,
+  databaseUrl: env.DATABASE_URL,
+  pgPoolMax: env.PG_POOL_MAX,
+  apiKey: env.API_KEY,
+  rateLimit: Object.freeze({ window: env.RATE_LIMIT_WINDOW, max: env.RATE_LIMIT_MAX }),
+  log: Object.freeze({
+    level: env.LOG_LEVEL,
+    dir: env.LOG_DIR,
+    maxSize: env.LOG_MAX_SIZE,
+    maxFiles: env.LOG_MAX_FILES,
+    zip: env.LOG_ZIP,
+  }),
 });

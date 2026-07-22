@@ -1,0 +1,13 @@
+// src/api/{{resource}}/post/route.js -> POST /{{resource}}   (create)
+// schema.json validates the body. `middleware` opts this route into idempotency (safe retries
+// via the Idempotency-Key header) — a reusable shared middleware. Auth + rate limit are global.
+
+import { idempotency } from '#/lib/idempotency.js';
+import * as {{resource}}Service from '#/services/{{resource}}.service.js';
+
+export const middleware = [idempotency];
+
+export default async (req, res) => {
+  const created = await {{resource}}Service.create(req.valid.body);
+  res.created(created, { self: ['GET', `/{{resource}}/${created.id}`] });
+};

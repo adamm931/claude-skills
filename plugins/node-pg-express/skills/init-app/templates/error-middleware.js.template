@@ -1,23 +1,26 @@
-// src/lib/error-middleware.js — the ONE place errors become HTTP responses. Registered LAST
-// in app.js. Maps a thrown error's `status` -> response; hides internals for unexpected 5xx.
+// src/lib/error-middleware.js — the ONE place errors become HTTP responses, in the same
+// envelope as success ({ data, message }). Registered LAST in app.js. Maps a thrown error's
+// `status` -> response and attaches `details` (e.g. Ajv validation errors) when present; hides
+// internals for unexpected 5xx.
 
-import { ZodError } from 'zod';
-import { isHttpError } from './errors.js';
-import { logger } from './logger.js';
+import { isHttpError } from '#/lib/errors.js';
+import { logger } from '#/lib/logger.js';
+
+const errorBody = (status, text, details) => ({
+  data: null,
+  message: details ? { status, type: 'error', text, details } : { status, type: 'error', text },
+});
 
 // eslint-disable-next-line no-unused-vars -- Express identifies error middleware by arity (4 args).
 export const errorMiddleware = (err, req, res, next) => {
-  // Zod validation failures -> 400 with field detail.
-  if (err instanceof ZodError) {
-    return res.status(400).json({ error: 'Bad Request', details: err.flatten().fieldErrors });
-  }
-
   if (isHttpError(err)) {
     if (err.status >= 500) logger.error('request failed', { path: req.originalUrl, err: err.message });
-    return res.status(err.status).json({ error: err.expose ? err.message : 'Internal Server Error' });
+    return res
+      .status(err.status)
+      .json(errorBody(err.status, err.expose ? err.message : 'Internal Server Error', err.details));
   }
 
   // Unexpected: log the full error, expose nothing.
   logger.error('unhandled error', { path: req.originalUrl, err: err.message, stack: err.stack });
-  return res.status(500).json({ error: 'Internal Server Error' });
+  return res.status(500).json(errorBody(500, 'Internal Server Error'));
 };

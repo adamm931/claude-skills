@@ -1,12 +1,13 @@
-// src/lib/errors.js — HTTP error factories (no classes). Each returns a plain Error carrying
-// an HTTP `status` and an `expose` flag the error middleware uses to decide what to leak.
-// Services throw these; they never format an HTTP response themselves.
+// src/lib/errors.js — HTTP error factories (no classes). Each returns a plain Error carrying an
+// HTTP `status`, an `expose` flag (whether the message is safe to return), and optional
+// `details`. Services throw these; they never format an HTTP response themselves.
 
-const httpError = (status, message, { expose = true, code } = {}) => {
+const httpError = (status, message, { expose = true, code, details } = {}) => {
   const err = new Error(message);
   err.status = status;
   err.expose = expose;
   if (code) err.code = code;
+  if (details) err.details = details;
   return err;
 };
 
@@ -15,6 +16,10 @@ export const unauthorized = (msg = 'Unauthorized', opts) => httpError(401, msg, 
 export const forbidden = (msg = 'Forbidden', opts) => httpError(403, msg, opts);
 export const notFound = (msg = 'Not Found', opts) => httpError(404, msg, opts);
 export const conflict = (msg = 'Conflict', opts) => httpError(409, msg, opts);
+export const tooManyRequests = (msg = 'Too Many Requests', opts) => httpError(429, msg, opts);
+
+/** 400 for JSON Schema (Ajv) validation failures; `details` is the list of field errors. */
+export const validationError = (details, msg = 'Validation failed') => httpError(400, msg, { details });
 
 /** True for an error produced by these factories (i.e. it carries an HTTP status). */
 export const isHttpError = (err) => typeof err?.status === 'number';

@@ -7,11 +7,21 @@ TypeScript**. Architecture rules are authoritative: see the `architecture-rules`
 ## This project
 - Server: Express 5, single process, one file-based router built at startup.
 - Layers (strict one-way `api -> services -> data`, `lib` shared by all):
-  - `src/api/` — file-based routes (Next.js style); `route.js` exports GET/POST/... handlers.
+  - `src/api/` — file-based routes, folder-per-method (`customers/get/route.js` -> GET /customers;
+    `[id]` -> `:id`). `route.js` default-exports the handler; a sibling `schema.json` (JSON Schema)
+    validates input.
   - `src/services/` — business logic, HTTP-agnostic plain functions.
   - `src/data/` — repositories; the only place that touches Postgres, via one `pg` Pool.
-  - `src/lib/` — config, logger, errors, asyncHandler, validate.
+  - `src/lib/` — config, logger (Winston: console + rolling file), errors, asyncHandler,
+    respond (envelope), validate (Ajv), auth, rate-limit, idempotency, query-params.
 - Database: PostgreSQL via raw `pg` (no ORM). `DATABASE_URL` in `.env`.
+- Validation: JSON Schema via Ajv — one library, used for both request input (`schema.json`) and env
+  (`config.js`). No Zod. Clean data on `req.valid.{headers,params,query,body}`.
+- Imports: Node-native `#/` alias (package.json `"imports": { "#/*": "./src/*" }`) —
+  `import x from '#/lib/x.js'`, never relative `../../..`.
+- Cross-cutting: auth (global x-api-key + public allowlist) and rate limit (global) are wired in
+  `app.js`; idempotency is opt-in per route (`export const middleware = [idempotency]`). Responses use
+  the `res.ok`/`res.created`/`res.page` envelope (`{ data, links|pagination, message }`).
 - Resources so far: {{ResourceList}}
 
 ## Non-negotiables
@@ -21,4 +31,5 @@ TypeScript**. Architecture rules are authoritative: see the `architecture-rules`
   throw the `lib/errors.js` factories.
 - Only repositories talk to Postgres, via `pool` — parameterized queries only, multi-statement
   writes through `withTransaction`.
-- Add a resource (route + service + repository) with the `new-resource` skill.
+- Add a resource (route + service + repository) with the `new-resource` skill; for each concern see
+  the `request-validation`, `auth`, `rate-limiting`, `idempotency`, `list-queries`, `responses` skills.
