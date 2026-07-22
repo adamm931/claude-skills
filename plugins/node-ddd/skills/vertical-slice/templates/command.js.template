@@ -1,0 +1,21 @@
+import { z } from 'zod';
+
+// src/modules/{{module}}/application/features/{{useCase}}/{{useCase}}.command.js
+
+// Stable string tag the Mediator dispatches on. Namespace by module to keep it unique.
+export const {{UseCase}}Type = '{{module}}.{{useCase}}';
+
+// Runtime contract (there are no compile-time types in plain JS) — the Zod-validation
+// middleware parses `input` against this before the handler runs.
+export const {{useCase}}Schema = z.object({
+  // {{ZodFields}}
+});
+
+/**
+ * Build a {{UseCase}} message: a plain object carrying the `type` tag + validated input.
+ * @param {z.infer<typeof {{useCase}}Schema>} input
+ */
+export const {{useCase}}Command = (input) => ({
+  type: {{UseCase}}Type,
+  input,
+});

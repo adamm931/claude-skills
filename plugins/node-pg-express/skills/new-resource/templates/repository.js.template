@@ -1,0 +1,35 @@
+// src/data/{{resource}}.repository.js — the data layer for {{resource}}. The ONLY place that
+// runs SQL for this resource. Parameterized queries only ($1, $2). Returns plain objects;
+// no business rules, no knowledge of HTTP. Use `withTransaction` for multi-statement writes.
+
+import { query } from './pool.js';
+
+const TABLE = '{{resource}}';
+
+export const findAll = () =>
+  query(`select * from ${TABLE} order by id`);
+
+export const findById = async (id) => {
+  const rows = await query(`select * from ${TABLE} where id = $1`, [id]);
+  return rows[0] ?? null;
+};
+
+export const insert = async (input) => {
+  // {{InsertColumns}} — list columns explicitly; pass values as params, never interpolated.
+  const rows = await query(
+    `insert into ${TABLE} (/* cols */) values (/* $1, ... */) returning *`,
+    [/* ...Object.values(input) */],
+  );
+  return rows[0];
+};
+
+export const update = async (id, input) => {
+  const rows = await query(
+    `update ${TABLE} set /* col = $2, ... */ where id = $1 returning *`,
+    [id /*, ...values */],
+  );
+  return rows[0];
+};
+
+export const remove = (id) =>
+  query(`delete from ${TABLE} where id = $1`, [id]);

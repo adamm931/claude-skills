@@ -8,11 +8,12 @@ description: >
 
 # Adding an integration event
 
-1. Define the event as a flat, JSON-serializable type in the SOURCE module's
-   `public/integration-events/`. Primitives only (string, number, ISO date strings, arrays) — never a
-   domain aggregate.
-2. In the source module, a domain-event handler writes a row to the module's `OutboxMessage` table in
-   the SAME transaction as the aggregate save (do NOT publish directly from the aggregate or handler).
+1. Define the event as a flat, JSON-serializable object built by a factory function in the SOURCE
+   module's `public/integration-events/`. Primitives only (string, number, ISO date strings, arrays)
+   — never a domain aggregate.
+2. In the source module, a domain-event handler function writes a row to the module's `OutboxMessage`
+   table in the SAME transaction as the aggregate save (do NOT publish directly from the aggregate
+   function or the command handler).
 3. A relay (a poller, or Postgres `LISTEN`/`NOTIFY` off the outbox table) reads unpublished outbox rows
    and publishes them — in-process via `EventEmitter` in the monolith, or to Kafka (`kafkajs`; see the
    `kafka-ops` plugin for a project-local broker) after splitting into services — then marks them sent.

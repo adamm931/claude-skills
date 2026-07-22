@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "node-pg-express",
+  "displayName": "Layered REST API (Node.js / Express / pg)",
+  "version": "1.0.0",
+  "description": "Scaffold and extend a fast, layered REST API in plain JavaScript (ESM, functional, no classes): Next.js-style file-based routing on Express, an api -> services -> data layering, and raw PostgreSQL via a pg Pool.",
+  "author": { "name": "adamm931" },
+  "repository": "https://github.com/adamm931/claude-skills",
+  "license": "MIT",
+  "keywords": ["node", "express", "postgres", "pg", "rest", "file-based-routing", "layered", "javascript", "functional"]
+}

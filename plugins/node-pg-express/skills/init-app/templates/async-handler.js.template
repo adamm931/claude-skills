@@ -1,0 +1,6 @@
+// src/lib/async-handler.js — wrap an async route handler so a rejected promise is forwarded
+// to Express's error handler instead of becoming an unhandled rejection. The router wraps
+// every route.js handler in this, so handlers can `throw` freely and skip try/catch.
+
+export const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);

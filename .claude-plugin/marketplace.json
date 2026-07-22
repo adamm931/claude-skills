@@ -13,6 +13,11 @@
       "description": "DDD modular monolith scaffolding and review for Node.js/TypeScript, using a hand-rolled mediator, Prisma, and the outbox pattern."
     },
     {
+      "name": "node-pg-express",
+      "source": "./plugins/node-pg-express",
+      "description": "Scaffold and extend a fast, layered REST API in plain JavaScript (ESM, functional, no classes): Next.js-style file-based routing on Express, an api -> services -> data layering, and raw PostgreSQL via a pg Pool."
+    },
+    {
       "name": "api-spec",
       "source": "./plugins/api-spec",
       "description": "Write API specs (REST, GraphQL) as versioned, decision-recording iteration docs."

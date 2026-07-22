@@ -1,0 +1,50 @@
+// src/router.js — file-based router. Walks src/api/ ONCE at startup and builds an Express
+// Router from the folder tree. A folder is a URL segment; `[param]` -> `:param`; each
+// `route.js` exports handler fns named by HTTP method (GET/POST/PUT/PATCH/DELETE).
+// There is no manual route table: add a folder + route.js and the route exists.
+
+import { readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { dirname } from 'node:path';
+import { Router } from 'express';
+import { asyncHandler } from './lib/async-handler.js';
+
+const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const API_DIR = join(dirname(fileURLToPath(import.meta.url)), 'api');
+
+// [id] -> :id (dynamic segment); anything else stays literal.
+const toSegment = (name) =>
+  name.startsWith('[') && name.endsWith(']') ? `:${name.slice(1, -1)}` : name;
+
+// Recursively collect every route.js under `dir`, remembering its URL path.
+function collect(dir, base = '') {
+  const routes = [];
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      routes.push(...collect(full, `${base}/${toSegment(entry)}`));
+    } else if (entry === 'route.js') {
+      routes.push({ file: full, path: base || '/' });
+    }
+  }
+  return routes;
+}
+
+/** Build the app's Express Router from the folder tree under src/api/. */
+export async function buildRouter() {
+  const router = Router();
+  // Sort so more specific paths register in a stable order.
+  const routes = collect(API_DIR).sort((a, b) => a.path.localeCompare(b.path));
+
+  for (const { file, path } of routes) {
+    const mod = await import(pathToFileURL(file).href);
+    for (const method of METHODS) {
+      const handler = mod[method];
+      if (typeof handler === 'function') {
+        router[method.toLowerCase()](path, asyncHandler(handler));
+      }
+    }
+  }
+  return router;
+}

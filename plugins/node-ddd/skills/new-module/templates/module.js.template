@@ -1,0 +1,16 @@
+// src/modules/{{name}}/{{name}}.module.js — composition root for this module.
+// Wires this module's repositories + handlers into the shared Mediator. Functional: no classes.
+
+// import { create{{Aggregate}}Repository } from './infrastructure/{{aggregate}}.repository.js';
+// import { {{UseCase}}Type } from './application/features/{{useCase}}/{{useCase}}.command.js';
+// import { {{useCase}}Handler } from './application/features/{{useCase}}/{{useCase}}.handler.js';
+
+/**
+ * @param {ReturnType<import('../../shared-kernel/index.js').createMediator>} mediator
+ * @param {import('@prisma/client').PrismaClient} prisma
+ */
+export const register{{Name}}Module = (mediator, prisma) => {
+  // const repo = create{{Aggregate}}Repository(prisma);
+  // Register handlers by their string `type` tag; deps are injected via partial application.
+  // mediator.register({{UseCase}}Type, {{useCase}}Handler({ repo }));
+};

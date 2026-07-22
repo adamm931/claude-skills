@@ -1,0 +1,24 @@
+// src/app.js — builds the Express app: global middleware, the file-based router, then the
+// single error handler LAST. Exported separately from server.js so tests can import the app
+// without opening a port.
+
+import express from 'express';
+import { buildRouter } from './router.js';
+import { requestLogger } from './lib/logger.js';
+import { errorMiddleware } from './lib/error-middleware.js';
+
+export async function createApp() {
+  const app = express();
+
+  app.use(express.json());
+  app.use(requestLogger);
+
+  // Mount the file-based routes (built once from src/api/).
+  app.use(await buildRouter());
+
+  // 404 for anything unmatched, then the error handler — both MUST be last.
+  app.use((req, res) => res.status(404).json({ error: 'Not Found' }));
+  app.use(errorMiddleware);
+
+  return app;
+}

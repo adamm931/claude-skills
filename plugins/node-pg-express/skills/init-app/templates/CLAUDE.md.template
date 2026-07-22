@@ -1,0 +1,24 @@
+# {{ProjectName}} — Project Memory
+
+A fast, **layered REST API** in Node.js — **plain JavaScript (ESM), functional style, no classes, no
+TypeScript**. Architecture rules are authoritative: see the `architecture-rules` skill
+(node-pg-express plugin).
+
+## This project
+- Server: Express 5, single process, one file-based router built at startup.
+- Layers (strict one-way `api -> services -> data`, `lib` shared by all):
+  - `src/api/` — file-based routes (Next.js style); `route.js` exports GET/POST/... handlers.
+  - `src/services/` — business logic, HTTP-agnostic plain functions.
+  - `src/data/` — repositories; the only place that touches Postgres, via one `pg` Pool.
+  - `src/lib/` — config, logger, errors, asyncHandler, validate.
+- Database: PostgreSQL via raw `pg` (no ORM). `DATABASE_URL` in `.env`.
+- Resources so far: {{ResourceList}}
+
+## Non-negotiables
+- Plain JS, ESM, functional — NO classes. Runtime validation with Zod at the API edge.
+- Routes are thin: validate input, call ONE service, shape the response. No SQL in `src/api/`.
+- Services never import `express` / touch `req`/`res`; they take plain args, return plain data,
+  throw the `lib/errors.js` factories.
+- Only repositories talk to Postgres, via `pool` — parameterized queries only, multi-statement
+  writes through `withTransaction`.
+- Add a resource (route + service + repository) with the `new-resource` skill.

@@ -1,0 +1,41 @@
+// src/data/pool.js — the ONE pg Pool for the whole process. Every repository imports `pool`.
+// Never create a Pool or Client per request. `query` and `withTransaction` are the only two
+// ways the data layer talks to Postgres.
+
+import pg from 'pg';
+import { config } from '../lib/config.js';
+
+export const pool = new pg.Pool({
+  connectionString: config.databaseUrl,
+  max: config.pgPoolMax,
+});
+
+/**
+ * Run a parameterized query on the shared pool. NEVER interpolate user input into `text`;
+ * pass it through `params` ($1, $2, ...).
+ * @returns rows
+ */
+export const query = async (text, params) => {
+  const result = await pool.query(text, params);
+  return result.rows;
+};
+
+/**
+ * Run `fn` inside a single transaction on one checked-out client. Commits on success,
+ * rolls back on any throw, always releases the client. Use for multi-statement writes.
+ * @param {(client: pg.PoolClient) => Promise<any>} fn
+ */
+export const withTransaction = async (fn) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+};

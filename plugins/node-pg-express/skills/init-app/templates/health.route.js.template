@@ -1,0 +1,10 @@
+// src/api/health/route.js -> GET /health
+// Sample route showing the file-based convention: export one fn per HTTP method. This one
+// pings the DB through the data layer's `query` to prove connectivity end-to-end.
+
+import { query } from '../../data/pool.js';
+
+export const GET = async (req, res) => {
+  await query('select 1');
+  res.json({ status: 'ok' });
+};

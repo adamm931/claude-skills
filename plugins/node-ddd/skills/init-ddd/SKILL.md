@@ -1,10 +1,10 @@
 ---
 name: init-ddd
 description: >
-  Scaffold a DDD modular-monolith Node.js/TypeScript project (app entry point, shared kernel, module
-  boundary enforcement, a first module) and write a project-root CLAUDE.md capturing the architecture
-  rules and project choices. Use when the user asks to start, bootstrap, or initialize a new DDD /
-  modular-monolith Node.js project.
+  Scaffold a DDD modular-monolith Node.js project in plain JavaScript (ESM, functional — no classes):
+  app entry point, shared kernel, module boundary enforcement, a first module, and a project-root
+  CLAUDE.md capturing the architecture rules and project choices. Use when the user asks to start,
+  bootstrap, or initialize a new DDD / modular-monolith Node.js project.
 ---
 
 # Initialize a DDD modular monolith
@@ -13,10 +13,11 @@ description: >
    environment yet — this is the mandatory first step before scaffolding anything.
 2. Confirm module names, HTTP framework (Fastify/Express/Nest), and integration-event transport
    (in-memory `EventEmitter` vs Kafka) with the user if not given.
-3. Scaffold the project skeleton from `templates/`:
-   - App entry point that wires the HTTP framework, the `Mediator`, and module registration.
-   - `src/shared-kernel/index.ts` — base types (see `templates/shared-kernel.ts.template`): `Entity`,
-     `AggregateRoot`, `IDomainEvent`, `DomainError`, `Mediator`.
+3. Set `"type": "module"` in `package.json` (ESM). Then scaffold the skeleton from `templates/`:
+   - App entry point that wires the HTTP framework, the `Mediator` (`createMediator()`), and module
+     registration.
+   - `src/shared-kernel/index.js` — base helpers (see `templates/shared-kernel.js.template`):
+     `createMediator`, `domainError`, `isDomainError`. No base classes; aggregates are plain functions.
    - `.dependency-cruiser.cjs` from `templates/dependency-cruiser.cjs.template` — the base config that
      `new-module` appends a per-module boundary rule to.
    - A first module via the `new-module` skill.

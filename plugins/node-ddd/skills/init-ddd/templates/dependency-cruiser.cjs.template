@@ -12,6 +12,7 @@ module.exports = {
     //   to: { path: '^src/modules/<name>/(domain|application|infrastructure)/' } },
   ],
   options: {
-    tsConfig: { fileName: 'tsconfig.json' },
+    // Plain JS (ESM). dependency-cruiser resolves `.js` imports directly — no tsConfig.
+    doNotFollow: { path: 'node_modules' },
   },
 };

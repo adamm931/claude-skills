@@ -1,0 +1,29 @@
+// src/services/{{resource}}.service.js — the business layer for {{resource}}.
+// HTTP-agnostic: plain args in, plain data out. No express, no req/res. Enforces rules and
+// throws the lib/errors factories; delegates all persistence to the repository.
+
+import * as repo from '../data/{{resource}}.repository.js';
+import { notFound } from '../lib/errors.js';
+
+export const list = () => repo.findAll();
+
+export const getById = async (id) => {
+  const item = await repo.findById(id);
+  if (!item) throw notFound('{{Resource}} not found');
+  return item;
+};
+
+export const create = (input) => {
+  // Business rules go here (defaults, invariants, cross-checks) before persisting.
+  return repo.insert(input);
+};
+
+export const update = async (id, input) => {
+  await getById(id); // ensure it exists (throws notFound otherwise)
+  return repo.update(id, input);
+};
+
+export const remove = async (id) => {
+  await getById(id);
+  await repo.remove(id);
+};

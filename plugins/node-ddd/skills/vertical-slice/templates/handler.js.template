@@ -1,0 +1,27 @@
+import { domainError } from '../../../shared-kernel/index.js';
+// import { {{useCase}} } from '../../../domain/{{aggregate}}.js'; // pure aggregate step
+
+// src/modules/{{module}}/application/features/{{useCase}}/{{useCase}}.handler.js
+
+/**
+ * The handler is a function, not a class. Dependencies are injected once via partial
+ * application (`{{useCase}}Handler({ repo })` at registration); the returned fn handles
+ * each command. Mediator middleware (Zod validation -> logging -> unit-of-work) already
+ * covers cross-cutting concerns — don't re-implement them here.
+ *
+ * @param {{ repo: ReturnType<typeof import('../../../infrastructure/{{aggregate}}.repository.js').create{{Aggregate}}Repository> }} deps
+ */
+export const {{useCase}}Handler = ({ repo }) => async (command) => {
+  const current = await repo.getById(command.input.id);
+  if (!current) {
+    throw domainError('{{Aggregate}} not found.');
+  }
+
+  // Pure domain step: immutable state in -> { state, events } out. No mutation, no `this`.
+  const { state, events } = {{useCase}}(current, command.input);
+
+  // Persists new state AND writes the events' OutboxMessage rows in ONE transaction.
+  await repo.save(state, events);
+
+  return undefined; // map `state` -> the response shape
+};

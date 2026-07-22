@@ -1,0 +1,6 @@
+// src/lib/validate.js — small helpers to parse request parts against a Zod schema at the API
+// edge. A failed parse throws a ZodError, which the error middleware turns into a 400. Keep
+// validation in the route handler (the edge); services receive already-clean data.
+
+/** Parse and return validated data, or throw ZodError. Use for req.body / req.query / req.params. */
+export const parse = (schema, data) => schema.parse(data);

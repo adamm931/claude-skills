@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "node-ddd",
-  "displayName": "DDD Modular Monolith (Node.js/TypeScript)",
-  "version": "1.0.0",
-  "description": "Scaffold and review a DDD, vertically-sliced modular monolith in Node.js/TypeScript using a hand-rolled mediator, Prisma, and the outbox pattern for integration events.",
+  "displayName": "DDD Modular Monolith (Node.js/JavaScript)",
+  "version": "2.0.0",
+  "description": "Scaffold and review a DDD, vertically-sliced modular monolith in Node.js using plain JavaScript (ESM, functional — no classes), a hand-rolled mediator, Prisma, and the outbox pattern for integration events.",
   "author": { "name": "adamm931" },
   "repository": "https://github.com/adamm931/claude-skills",
   "license": "MIT",
-  "keywords": ["node", "typescript", "ddd", "modular-monolith", "prisma", "kafka", "vertical-slice"]
+  "keywords": ["node", "javascript", "esm", "functional", "ddd", "modular-monolith", "prisma", "kafka", "vertical-slice"]
 }

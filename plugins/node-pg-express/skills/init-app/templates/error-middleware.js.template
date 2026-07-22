@@ -1,0 +1,23 @@
+// src/lib/error-middleware.js — the ONE place errors become HTTP responses. Registered LAST
+// in app.js. Maps a thrown error's `status` -> response; hides internals for unexpected 5xx.
+
+import { ZodError } from 'zod';
+import { isHttpError } from './errors.js';
+import { logger } from './logger.js';
+
+// eslint-disable-next-line no-unused-vars -- Express identifies error middleware by arity (4 args).
+export const errorMiddleware = (err, req, res, next) => {
+  // Zod validation failures -> 400 with field detail.
+  if (err instanceof ZodError) {
+    return res.status(400).json({ error: 'Bad Request', details: err.flatten().fieldErrors });
+  }
+
+  if (isHttpError(err)) {
+    if (err.status >= 500) logger.error('request failed', { path: req.originalUrl, err: err.message });
+    return res.status(err.status).json({ error: err.expose ? err.message : 'Internal Server Error' });
+  }
+
+  // Unexpected: log the full error, expose nothing.
+  logger.error('unhandled error', { path: req.originalUrl, err: err.message, stack: err.stack });
+  return res.status(500).json({ error: 'Internal Server Error' });
+};

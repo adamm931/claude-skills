@@ -1,0 +1,32 @@
+// src/api/{{resource}}/[id]/route.js -> /{{resource}}/:id  (single item)
+// `[id]` folder -> `:id` param. Same rule: validate, call ONE service fn, shape response.
+
+import { z } from 'zod';
+import * as {{resource}}Service from '../../../services/{{resource}}.service.js';
+
+const idSchema = z.coerce.number().int().positive();
+const update{{Resource}}Schema = z.object({
+  // {{ZodFields}}
+});
+
+// GET /{{resource}}/:id
+export const GET = async (req, res) => {
+  const id = idSchema.parse(req.params.id);
+  const item = await {{resource}}Service.getById(id); // throws notFound() if missing
+  res.json(item);
+};
+
+// PUT /{{resource}}/:id
+export const PUT = async (req, res) => {
+  const id = idSchema.parse(req.params.id);
+  const input = update{{Resource}}Schema.parse(req.body);
+  const updated = await {{resource}}Service.update(id, input);
+  res.json(updated);
+};
+
+// DELETE /{{resource}}/:id
+export const DELETE = async (req, res) => {
+  const id = idSchema.parse(req.params.id);
+  await {{resource}}Service.remove(id);
+  res.status(204).end();
+};

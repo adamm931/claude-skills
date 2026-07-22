@@ -1,0 +1,20 @@
+// src/lib/errors.js — HTTP error factories (no classes). Each returns a plain Error carrying
+// an HTTP `status` and an `expose` flag the error middleware uses to decide what to leak.
+// Services throw these; they never format an HTTP response themselves.
+
+const httpError = (status, message, { expose = true, code } = {}) => {
+  const err = new Error(message);
+  err.status = status;
+  err.expose = expose;
+  if (code) err.code = code;
+  return err;
+};
+
+export const badRequest = (msg = 'Bad Request', opts) => httpError(400, msg, opts);
+export const unauthorized = (msg = 'Unauthorized', opts) => httpError(401, msg, opts);
+export const forbidden = (msg = 'Forbidden', opts) => httpError(403, msg, opts);
+export const notFound = (msg = 'Not Found', opts) => httpError(404, msg, opts);
+export const conflict = (msg = 'Conflict', opts) => httpError(409, msg, opts);
+
+/** True for an error produced by these factories (i.e. it carries an HTTP status). */
+export const isHttpError = (err) => typeof err?.status === 'number';

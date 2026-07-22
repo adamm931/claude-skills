@@ -7,9 +7,10 @@ if [ ! -f package.json ]; then
   exit 0
 fi
 
-if [ -f tsconfig.json ]; then
-  echo "verify: typecheck"
-  npx --no-install tsc --noEmit
+# Plain JS project: no typecheck step. A syntax smoke-check via node --check if a src exists.
+if command -v node >/dev/null 2>&1 && [ -d src ]; then
+  echo "verify: syntax"
+  find src -name '*.js' -print0 | xargs -0 -r -n1 node --check
 fi
 
 # Module boundary check (dependency-cruiser), if configured.

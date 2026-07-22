@@ -1,16 +1,20 @@
 # {{ProjectName}} — Project Memory
 
-This project is a **DDD, vertically-sliced modular monolith** in Node.js/TypeScript.
-Architecture rules are authoritative: see the `architecture-rules` skill (node-ddd plugin).
+This project is a **DDD, vertically-sliced modular monolith** in Node.js — **plain JavaScript (ESM),
+functional style, no classes**. Architecture rules are authoritative: see the `architecture-rules`
+skill (node-ddd plugin).
 
 ## This project
 - Modules (bounded contexts): {{ModuleList}}
 - Database: PostgreSQL via Prisma — each module owns its schema; no cross-module joins.
-- Messaging: hand-rolled `Mediator` in-process; outbox + {{IntegrationTransport}} for integration events.
+- Messaging: hand-rolled functional `Mediator` (`createMediator()`) in-process, dispatching by a
+  request's `type` tag; outbox + {{IntegrationTransport}} for integration events.
 - Reliability: outbox row written in the aggregate's transaction; consumers are idempotent (inbox dedupe).
 
 ## Non-negotiables
+- Plain JS, ESM, functional — NO classes. Immutable state (`Object.freeze`); runtime validation (Zod).
 - Modules talk only through `modules/<name>/public`. Everything else is module-internal.
-- One aggregate mutated per transaction; invariants inside the aggregate root.
+- One aggregate updated per transaction; invariants inside the aggregate's pure functions, which
+  return `{ state, events }`.
 - Add features as vertical slices under `application/features/<use-case>/` (use the `vertical-slice` skill).
 - Add cross-module reactions as integration events (use the `integration-event` skill).

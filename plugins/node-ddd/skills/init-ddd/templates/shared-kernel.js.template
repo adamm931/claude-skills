@@ -1,0 +1,60 @@
+// src/shared-kernel/index.js — base building blocks. Plain JS, functional: no classes.
+
+/**
+ * Build a domain error. Deliberately NOT a class — construct with a factory and
+ * identify with `err.name === 'DomainError'` (or `isDomainError`).
+ * @param {string} message
+ */
+export const domainError = (message) => {
+  const err = new Error(message);
+  err.name = 'DomainError';
+  return err;
+};
+
+/** @param {unknown} err */
+export const isDomainError = (err) =>
+  err instanceof Error && err.name === 'DomainError';
+
+/**
+ * Minimal in-process command/query bus — the MediatR equivalent for this project.
+ * Functional: `createMediator()` closes over the handler map + middleware chain and
+ * returns `{ register, use, send }`. Requests are plain objects with a string `type`
+ * tag; dispatch is by that tag (no `constructor`, no classes).
+ */
+export const createMediator = () => {
+  /** @type {Map<string, (request: object) => Promise<unknown>>} */
+  const handlers = new Map();
+  /** @type {Array<(request: object, next: () => Promise<unknown>) => Promise<unknown>>} */
+  const middleware = [];
+
+  return {
+    /**
+     * @param {string} type - the request's `type` tag, e.g. 'orders.placeOrder'
+     * @param {(request: object) => Promise<unknown>} handler
+     */
+    register(type, handler) {
+      if (handlers.has(type)) {
+        throw new Error(`Handler already registered for "${type}"`);
+      }
+      handlers.set(type, handler);
+    },
+
+    /** @param {(request: object, next: () => Promise<unknown>) => Promise<unknown>} mw */
+    use(mw) {
+      middleware.push(mw);
+    },
+
+    /** @param {{ type: string }} request */
+    async send(request) {
+      const handler = handlers.get(request?.type);
+      if (!handler) {
+        throw new Error(`No handler registered for "${request?.type}"`);
+      }
+      const chain = middleware.reduceRight(
+        (next, mw) => () => mw(request, next),
+        () => handler(request),
+      );
+      return chain();
+    },
+  };
+};
