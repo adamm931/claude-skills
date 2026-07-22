@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "docker-ops",
+  "displayName": "Docker Ops",
+  "version": "1.0.0",
+  "description": "Containerize an app's own services: write multi-stage Dockerfiles for a Node backend and a static (Vite/React) frontend, wire them into a project-local compose file, and operate them day-to-day.",
+  "author": { "name": "adamm931" },
+  "repository": "https://github.com/adamm931/claude-skills",
+  "license": "MIT",
+  "keywords": ["docker", "compose", "dockerfile", "containers", "nginx", "multi-stage"]
+}

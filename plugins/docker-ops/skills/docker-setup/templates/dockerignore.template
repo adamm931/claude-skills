@@ -1,0 +1,33 @@
+# Dependencies — reinstalled inside the image, never copy the host's
+node_modules
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output — regenerated in the build stage
+dist
+build
+out
+.next
+coverage
+
+# VCS / editor / OS cruft
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+
+# Secrets and local env — must never enter an image layer
+.env
+.env.*
+!.env.example
+
+# Docker's own files — not part of the app
+Dockerfile
+.dockerignore
+docker
+
+# Tests and docs — not needed at runtime
+**/*.test.js
+**/*.spec.js

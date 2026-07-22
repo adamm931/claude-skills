@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      # TODO: point at where the backend Dockerfile lives.
+      #   Context is relative to THIS file (docker/), so `..` is the repo root.
+      #   Monorepo: context ../services/api, dockerfile Dockerfile.
+      context: ..
+      dockerfile: services/api/Dockerfile
+    ports:
+      - "${API_PORT:-3000}:3000"
+    env_file:
+      - ../.env
+    environment:
+      NODE_ENV: production
+      # TODO: reference backing services by name, not localhost.
+      # DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # KAFKA_BROKERS: kafka:29092
+    # depends_on only orders startup — the app must still retry its DB connection.
+    # depends_on:
+    #   - postgres
+    restart: unless-stopped
+
+  web:
+    build:
+      # TODO: point at where the frontend Dockerfile lives.
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped

@@ -41,6 +41,11 @@
       "name": "kafka-ops",
       "source": "./plugins/kafka-ops",
       "description": "Scaffold a project-local Dockerized Kafka (KRaft, single-node), and operate it day-to-day: lifecycle, topics, produce/consume."
+    },
+    {
+      "name": "docker-ops",
+      "source": "./plugins/docker-ops",
+      "description": "Containerize an app's own services: write multi-stage Dockerfiles for a Node backend and a static (Vite/React) frontend, wire them into a project-local compose file, and operate them day-to-day."
     }
   ]
 }
