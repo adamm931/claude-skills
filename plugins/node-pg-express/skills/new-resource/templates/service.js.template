@@ -2,8 +2,8 @@
 // HTTP-agnostic: plain args in, plain data out. No express, no req/res. Enforces rules and
 // throws the lib/errors factories; delegates all persistence to the repository.
 
-import * as repo from '#/data/{{resource}}.repository.js';
-import { notFound } from '#/lib/errors.js';
+import * as repo from '#data/{{resource}}.repository.js';
+import { notFound } from '#lib/errors.js';
 
 /** @param spec parsed list query { page, pageSize, sort, filters } -> { rows, total } */
 export const list = (spec) => repo.findMany(spec);

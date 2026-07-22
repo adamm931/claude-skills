@@ -3,13 +3,13 @@
 // handler LAST. Exported separately from server.js so tests can import the app without a port.
 
 import express from 'express';
-import { buildRouter } from '#/router.js';
-import { config } from '#/lib/config.js';
-import { requestLogger } from '#/lib/logger.js';
-import { responder } from '#/lib/respond.js';
-import { apiKeyAuth } from '#/lib/auth.js';
-import { rateLimit } from '#/lib/rate-limit.js';
-import { errorMiddleware } from '#/lib/error-middleware.js';
+import { buildRouter } from '#router.js';
+import { config } from '#lib/config.js';
+import { requestLogger } from '#lib/logger.js';
+import { responder } from '#lib/respond.js';
+import { apiKeyAuth } from '#lib/auth.js';
+import { rateLimit } from '#lib/rate-limit.js';
+import { errorMiddleware } from '#lib/error-middleware.js';
 
 // Paths reachable WITHOUT an API key. Everything else requires `x-api-key`.
 const PUBLIC_PATHS = ['/health'];

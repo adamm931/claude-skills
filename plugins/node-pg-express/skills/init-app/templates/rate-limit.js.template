@@ -6,7 +6,7 @@
 // autoscaling? Swap the `buckets` Map for a shared store (Redis INCR + EXPIRE) — the middleware
 // shape stays the same.
 
-import { tooManyRequests } from '#/lib/errors.js';
+import { tooManyRequests } from '#lib/errors.js';
 
 const buckets = new Map(); // clientKey -> { count, resetAt }
 

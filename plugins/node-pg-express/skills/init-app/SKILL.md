@@ -37,13 +37,14 @@ description: >
        rate-limit.js      # GLOBAL fixed-window limiter, keyed by client  (rate-limit.js.template)
        idempotency.js     # reusable Idempotency-Key middleware (opt-in per route)  (idempotency.js.template)
        query-params.js    # parseListQuery (whitelist) + buildListQuery  (query-params.js.template)
-   package.json           # "type":"module", "imports":{"#/*":"./src/*"}, express/pg/ajv/winston  (package.json.template)
+   package.json           # "type":"module", "imports":{"#*":"./src/*"}, express/pg/ajv/winston  (package.json.template)
    .env.example           # DATABASE_URL, API_KEY, rate limit, logging  (env.example.template)
    ```
 
-   Imports use the Node-native `#/` alias (package.json `"imports": { "#/*": "./src/*" }`), e.g.
-   `import { config } from '#/lib/config.js'` — never relative `../../..`. No loader or build step;
-   editors resolve `#/` from the `imports` field.
+   Imports use the Node-native subpath alias (package.json `"imports": { "#*": "./src/*" }`), e.g.
+   `import { config } from '#lib/config.js'` — never relative `../../..`. No loader or build step;
+   editors resolve `#` from the `imports` field. (Node forbids a `#/…` key/specifier — it must be `#`
+   with no slash.)
 
    Substitute `{{projectName}}` / `{{ProjectName}}` when copying `package.json`, `.env.example`, and
    `CLAUDE.md`. Copy `health.route.js.template` to `src/api/health/get/route.js`. Also create

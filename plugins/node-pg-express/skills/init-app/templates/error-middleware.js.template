@@ -3,8 +3,8 @@
 // `status` -> response and attaches `details` (e.g. Ajv validation errors) when present; hides
 // internals for unexpected 5xx.
 
-import { isHttpError } from '#/lib/errors.js';
-import { logger } from '#/lib/logger.js';
+import { isHttpError } from '#lib/errors.js';
+import { logger } from '#lib/logger.js';
 
 const errorBody = (status, text, details) => ({
   data: null,

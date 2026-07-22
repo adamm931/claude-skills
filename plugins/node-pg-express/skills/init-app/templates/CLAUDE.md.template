@@ -17,16 +17,18 @@ TypeScript**. Architecture rules are authoritative: see the `architecture-rules`
 - Database: PostgreSQL via raw `pg` (no ORM). `DATABASE_URL` in `.env`.
 - Validation: JSON Schema via Ajv — one library, used for both request input (`schema.json`) and env
   (`config.js`). No Zod. Clean data on `req.valid.{headers,params,query,body}`.
-- Imports: Node-native `#/` alias (package.json `"imports": { "#/*": "./src/*" }`) —
-  `import x from '#/lib/x.js'`, never relative `../../..`.
+- Imports: Node-native subpath alias (package.json `"imports": { "#*": "./src/*" }`) —
+  `import x from '#lib/x.js'`, never relative `../../..` (Node requires `#` with no slash).
 - Cross-cutting: auth (global x-api-key + public allowlist) and rate limit (global) are wired in
   `app.js`; idempotency is opt-in per route (`export const middleware = [idempotency]`). Responses use
   the `res.ok`/`res.created`/`res.page` envelope (`{ data, links|pagination, message }`).
 - Resources so far: {{ResourceList}}
 
 ## Non-negotiables
-- Plain JS, ESM, functional — NO classes. Runtime validation with Zod at the API edge.
-- Routes are thin: validate input, call ONE service, shape the response. No SQL in `src/api/`.
+- Plain JS, ESM, functional — NO classes, NO TypeScript. Input validation is JSON Schema (Ajv) via
+  each route's `schema.json`; read clean data from `req.valid.*`. No Zod.
+- Routes live in a method folder (`get`/`post`/...), default-export the handler, and are thin:
+  call ONE service, shape the response with a `res.*` helper. No SQL in `src/api/`.
 - Services never import `express` / touch `req`/`res`; they take plain args, return plain data,
   throw the `lib/errors.js` factories.
 - Only repositories talk to Postgres, via `pool` — parameterized queries only, multi-statement

@@ -12,5 +12,6 @@
   `middleware` export, backed by the `idempotency_keys` table), list-queries (pagination + whitelisted
   sort/filter), responses (one envelope `{ data, links|pagination, message }` + HATEOAS), logging
   (Winston: console + rolling daily file, env-driven).
-- Internal imports via the Node-native `#/` alias (package.json `"imports"`), no build step.
+- Internal imports via the Node-native `#` subpath alias (package.json `"imports": { "#*": "./src/*" }`),
+  no build step.
 - layered-reviewer agent; PostToolUse verify hook (syntax + layer-boundary guards).

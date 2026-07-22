@@ -2,8 +2,8 @@
 // runs SQL for this resource. Parameterized queries only ($1, $2). Returns plain objects; no
 // business rules, no knowledge of HTTP. Use `withTransaction` for multi-statement writes.
 
-import { query } from '#/data/pool.js';
-import { buildListQuery } from '#/lib/query-params.js';
+import { query } from '#data/pool.js';
+import { buildListQuery } from '#lib/query-params.js';
 
 const TABLE = '{{resource}}';
 

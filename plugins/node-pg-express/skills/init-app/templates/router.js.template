@@ -18,8 +18,8 @@ import { readdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Router } from 'express';
-import { asyncHandler } from '#/lib/async-handler.js';
-import { compileSchema } from '#/lib/validate.js';
+import { asyncHandler } from '#lib/async-handler.js';
+import { compileSchema } from '#lib/validate.js';
 
 const METHODS = new Set(['get', 'post', 'put', 'patch', 'delete']);
 const API_DIR = join(dirname(fileURLToPath(import.meta.url)), 'api');

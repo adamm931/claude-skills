@@ -2,8 +2,8 @@
 // Folder-per-method: `get` folder = GET; default-export the handler. schema.json (sibling)
 // validates the raw query; parseListQuery applies the sort/filter WHITELIST + builds the spec.
 
-import { parseListQuery } from '#/lib/query-params.js';
-import * as {{resource}}Service from '#/services/{{resource}}.service.js';
+import { parseListQuery } from '#lib/query-params.js';
+import * as {{resource}}Service from '#services/{{resource}}.service.js';
 
 export default async (req, res) => {
   const spec = parseListQuery(req.valid.query, {

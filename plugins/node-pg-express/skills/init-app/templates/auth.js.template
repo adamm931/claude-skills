@@ -6,8 +6,8 @@
 // wiring it globally, and the public allowlist still applies.
 
 import { timingSafeEqual } from 'node:crypto';
-import { config } from '#/lib/config.js';
-import { unauthorized } from '#/lib/errors.js';
+import { config } from '#lib/config.js';
+import { unauthorized } from '#lib/errors.js';
 
 // Constant-time compare so a wrong key can't be guessed byte-by-byte via timing.
 const safeEqual = (a, b) => {

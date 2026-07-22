@@ -1,7 +1,7 @@
 // src/api/{{resource}}/[id]/put/route.js -> PUT /{{resource}}/:id   (update)
 // schema.json validates both the :id param and the body.
 
-import * as {{resource}}Service from '#/services/{{resource}}.service.js';
+import * as {{resource}}Service from '#services/{{resource}}.service.js';
 
 export default async (req, res) => {
   const { id } = req.valid.params;

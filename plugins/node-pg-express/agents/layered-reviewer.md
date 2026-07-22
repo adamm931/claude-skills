@@ -28,7 +28,7 @@ REST API. Check the diff for violations:
   other than a route's `export const middleware = [idempotency]`.
 - Responses built with a bare `res.json(...)` instead of the `res.ok`/`res.created`/`res.page`
   envelope helpers; error bodies formatted in a handler instead of thrown as a `lib/errors.js` factory.
-- Relative `../../..` imports for internal modules instead of the `#/` alias.
+- Relative `../../..` imports for internal modules instead of the `#` subpath alias.
 - A `route.js` not inside a method folder (get/post/put/patch/delete), or missing its `export default`
   handler.
 

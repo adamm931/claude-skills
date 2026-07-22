@@ -3,7 +3,7 @@
 // No schema.json here (nothing to validate). Pings the DB via the data layer to prove
 // connectivity, and uses the response envelope helper `res.ok`.
 
-import { query } from '#/data/pool.js';
+import { query } from '#data/pool.js';
 
 export default async (req, res) => {
   await query('select 1');

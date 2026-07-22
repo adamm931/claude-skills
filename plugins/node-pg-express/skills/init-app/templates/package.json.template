@@ -5,7 +5,7 @@
   "type": "module",
   "engines": { "node": ">=20" },
   "imports": {
-    "#/*": "./src/*"
+    "#*": "./src/*"
   },
   "scripts": {
     "start": "node src/server.js",

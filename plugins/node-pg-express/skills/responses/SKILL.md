@@ -65,8 +65,9 @@ Pair with the `list-queries` skill, which produces `{ rows, total }` and the par
 
 ## Errors — handled centrally
 
-Errors are NOT built in handlers. Throw a `lib/errors.js` factory (`notFound()`, `badRequest()`, …) or
-let a `ZodError` propagate; the error middleware emits the matching envelope:
+Errors are NOT built in handlers. Throw a `lib/errors.js` factory (`notFound()`, `badRequest()`, …);
+JSON Schema (Ajv) validation failures become a `validationError` automatically. The error middleware
+emits the matching envelope:
 ```json
 { "data": null, "message": { "status": 404, "type": "error", "text": "Customer not found" } }
 ```

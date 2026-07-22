@@ -2,8 +2,8 @@
 // schema.json validates the body. `middleware` opts this route into idempotency (safe retries
 // via the Idempotency-Key header) — a reusable shared middleware. Auth + rate limit are global.
 
-import { idempotency } from '#/lib/idempotency.js';
-import * as {{resource}}Service from '#/services/{{resource}}.service.js';
+import { idempotency } from '#lib/idempotency.js';
+import * as {{resource}}Service from '#services/{{resource}}.service.js';
 
 export const middleware = [idempotency];
 

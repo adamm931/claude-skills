@@ -5,7 +5,7 @@
 
 import winston from 'winston';
 import 'winston-daily-rotate-file'; // registers winston.transports.DailyRotateFile
-import { config } from '#/lib/config.js';
+import { config } from '#lib/config.js';
 
 const { combine, timestamp, json, printf, colorize, errors } = winston.format;
 

@@ -8,7 +8,7 @@
 //   buildListQuery(table, columns, spec)
 //     -> { sql, params, countSql, countParams }   (parameterized; only whitelisted columns as identifiers)
 
-import { badRequest } from '#/lib/errors.js';
+import { badRequest } from '#lib/errors.js';
 
 /** Turn validated raw query params into a safe spec, rejecting non-whitelisted sort/filter fields. */
 export const parseListQuery = (query, { sortable = [], filterable = [] } = {}) => {

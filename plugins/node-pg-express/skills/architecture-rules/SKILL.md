@@ -18,9 +18,9 @@ per-request object graphs, no classes. Every request flows in ONE direction thro
 - NO classes anywhere — factory functions, closures, and modules of plain/async functions only.
 - ONE validation library: JSON Schema via **Ajv** — for both request input (`schema.json`) and env
   (`config.js`). No Zod. Use JSDoc for editor hints, never for enforcement.
-- Internal imports use the `#/` alias (Node-native package.json `"imports": { "#/*": "./src/*" }`) —
-  `import { config } from '#/lib/config.js'`, NEVER relative `../../..`. External/npm packages import
-  by their bare name as usual.
+- Internal imports use the Node-native subpath alias (package.json `"imports": { "#*": "./src/*" }`) —
+  `import { config } from '#lib/config.js'`, NEVER relative `../../..`. (Node requires `#` with no
+  slash — `#/…` is invalid.) External/npm packages import by their bare name as usual.
 - Data passed between layers is plain objects. Return values, not shared mutable state.
 
 ## Layers (strict, one-directional: `api -> services -> data`)

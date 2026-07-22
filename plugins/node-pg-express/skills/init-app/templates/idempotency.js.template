@@ -6,7 +6,7 @@
 // Requires the `idempotency_keys` table (see the idempotency skill's migration). Single-table,
 // best-effort: good for one instance; add a unique-key insert-first lock for strict guarantees.
 
-import { query } from '#/data/pool.js';
+import { query } from '#data/pool.js';
 
 export const idempotency = async (req, res, next) => {
   const key = req.get('idempotency-key');
