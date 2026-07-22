@@ -9,6 +9,9 @@ description: >
 
 Run from the repo root.
 
+> **Aggregated with `compose-stack`?** Run bare `docker compose ps` to see every service in the stack
+> at once. The `-f` form below scopes to just the app services.
+
 ```bash
 docker compose -f docker/app.compose.yml ps
 ```

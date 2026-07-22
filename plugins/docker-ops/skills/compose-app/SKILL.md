@@ -59,3 +59,7 @@ docker compose -f docker/postgres.compose.yml -f docker/app.compose.yml up -d --
 
 Then confirm with `docker-status` before reporting success. See `docker-up` for the first-run vs
 rebuild distinction.
+
+Retyping the `-f` list on every command gets old fast — once more than one compose file is in play,
+`compose-stack` aggregates them behind a root `compose.yaml` so a bare `docker compose up -d` (or
+`docker compose up -d <service>` for one service) does the same thing.

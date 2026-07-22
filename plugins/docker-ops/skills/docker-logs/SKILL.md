@@ -9,6 +9,10 @@ description: >
 
 Run from the repo root. Name the service to scope the output (`api` or `web`); omit it for both.
 
+> **Aggregated with `compose-stack`?** Run bare `docker compose logs --tail=100 <service>` — you can
+> name any service in the stack (`api`, `web`, `postgres`, ...). The `-f` form below is scoped to the
+> app compose file.
+
 ```bash
 docker compose -f docker/app.compose.yml logs --tail=100 api
 ```

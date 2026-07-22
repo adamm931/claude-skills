@@ -9,6 +9,10 @@ description: >
 
 Run from the repo root.
 
+> **Aggregated with `compose-stack`?** Run bare `docker compose down` (whole stack) or
+> `docker compose stop <service>` to stop one service without removing it. The `-f` forms below are
+> for a project that hasn't aggregated.
+
 ```bash
 docker compose -f docker/app.compose.yml down
 ```

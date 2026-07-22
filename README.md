@@ -68,7 +68,7 @@ collisions between plugins):
 | [`data-model`](plugins/data-model) | data-model-mssql ✅, data-model-postgres ✅ | Write data-layer specs (schema, indexes, migrations) as versioned iteration docs |
 | [`postgres-ops`](plugins/postgres-ops) | postgres-setup, postgres-up, postgres-down, postgres-status, postgres-logs, postgres-reset, postgres-query, postgres-backup | Scaffold a project-local Dockerized Postgres and operate it day-to-day |
 | [`kafka-ops`](plugins/kafka-ops) | kafka-setup, kafka-up, kafka-down, kafka-status, kafka-logs, kafka-reset, kafka-topics | Scaffold a project-local Dockerized Kafka (KRaft) and operate it day-to-day |
-| [`docker-ops`](plugins/docker-ops) | docker-setup, dockerfile-node, dockerfile-web, compose-app, docker-up, docker-down, docker-status, docker-logs | Containerize the app's own services (Node backend + static frontend) with multi-stage Dockerfiles and a project-local compose file, then operate them |
+| [`docker-ops`](plugins/docker-ops) | docker-setup, dockerfile-node, dockerfile-web, compose-app, compose-stack, docker-up, docker-down, docker-status, docker-logs | Containerize the app's own services (Node backend + static frontend) with multi-stage Dockerfiles, wire them into a project-local compose file, aggregate every compose file into one stack, then operate them |
 | [`react-standards`](plugins/react-standards) | app-scaffold, forms, theming, component-design, data-fetching, state-management, error-handling, lazy-routes, lint-format | Opinionated standards for React + TypeScript apps, from project scaffold to lint/format |
 
 `api-spec` and `data-model` were extracted from the spec-writing conventions in

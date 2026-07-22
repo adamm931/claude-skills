@@ -1,0 +1,10 @@
+# Root aggregator. Compose auto-discovers this file, so from the repo root
+# `docker compose up -d` runs the whole stack and `docker compose up -d <service>`
+# brings up just that service (plus its depends_on) — no -f flags needed.
+#
+# One entry per per-concern compose file the project actually has. Add a line
+# whenever a new docker/<concern>.compose.yml is scaffolded; comment out what's unused.
+include:
+  - docker/app.compose.yml
+  # - docker/postgres.compose.yml   # postgres-ops
+  # - docker/kafka.compose.yml      # kafka-ops

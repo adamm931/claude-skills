@@ -10,6 +10,11 @@ description: >
 
 Run from the repo root.
 
+> **If you've aggregated with `compose-stack`** (a root `compose.yaml` with `include:`), skip the
+> `-f` lists below — run bare `docker compose up -d --build`, or `docker compose up -d <service>` to
+> bring up one service and its `depends_on`. The rest of this skill is the explicit-`-f` form for a
+> project that hasn't aggregated.
+
 ## First run, or after any Dockerfile / source change → build
 
 ```bash
